@@ -63,6 +63,13 @@
       <script src="{{ 'animations.js' | asset_url }}" defer="defer"></script>
     {%- endif -%}
 
+    <script>
+      window.ONESELF_BACKEND_URL = {{ settings.oneself_backend_url | json }};
+      window.ONESELF_TEMPLATE = {{ template.name | json }};
+      window.ONESELF_PRODUCT_HANDLE = {% if template.name == 'product' %}{{ product.handle | json }}{% else %}null{% endif %};
+    </script>
+    <script src="{{ 'oneself-events.js' | asset_url }}" defer="defer"></script>
+
     {{ content_for_header }}
 
     {%- liquid

@@ -13,6 +13,7 @@ export function createApp(db) {
   app.use(
     cors({
       origin: ALLOWED_ORIGINS,
+      credentials: true,
     })
   );
   // sendBeacon doesn't reliably set an application/json content-type, so

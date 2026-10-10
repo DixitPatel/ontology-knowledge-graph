@@ -212,7 +212,7 @@
                   {{ block.settings.custom_liquid }}
                 {%- when 'collapsible_tab' -%}
                   <div class="product__accordion accordion quick-add-hidden" {{ block.shopify_attributes }}>
-                    <details id="Details-{{ block.id }}-{{ section.id }}">
+                    <details id="Details-{{ block.id }}-{{ section.id }}" data-oneself-section="{{ block.id }}">
                       <summary>
                         <div class="summary__title">
                           {% render 'icon-accordion', icon: block.settings.icon %}

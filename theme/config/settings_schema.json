@@ -1,5 +1,17 @@
 [
   {
+    "name": "Oneself intent",
+    "settings": [
+      {
+        "type": "text",
+        "id": "oneself_backend_url",
+        "label": "Behavior capture backend URL",
+        "info": "Base URL for the /events endpoint (no trailing slash).",
+        "default": "http://127.0.0.1:8787"
+      }
+    ]
+  },
+  {
     "name": "theme_info",
     "theme_name": "Dawn",
     "theme_version": "16.0.0",
