@@ -6,15 +6,21 @@
         "heading": {
           "type": "heading",
           "settings": {
-            "heading": "Browse our latest products",
+            "heading": "Skincare that answers your questions",
             "heading_size": "h0"
+          }
+        },
+        "text": {
+          "type": "text",
+          "settings": {
+            "text": "Barrier repair and gentle exfoliation. Tell us what you're working on and we'll point you to the right step."
           }
         },
         "button": {
           "type": "buttons",
           "settings": {
             "button_label_1": "Shop all",
-            "button_link_1": "shopify://collections/all",
+            "button_link_1": "shopify://collections/shop-all",
             "button_style_secondary_1": true,
             "button_label_2": "",
             "button_link_2": "",
@@ -24,6 +30,7 @@
       },
       "block_order": [
         "heading",
+        "text",
         "button"
       ],
       "settings": {
@@ -39,17 +46,60 @@
         "show_text_below": false
       }
     },
+    "routine_steps": {
+      "type": "multicolumn",
+      "blocks": {
+        "step_treat": {
+          "type": "column",
+          "settings": {
+            "title": "Step 1 — Treat",
+            "text": "<p>Smooth Operator AHA Serum exfoliates to smooth texture and fade dullness. Patch test before first use.</p>",
+            "link_label": "Shop the serum",
+            "link": "shopify://products/smooth-operator-aha-serum"
+          }
+        },
+        "step_moisturise": {
+          "type": "column",
+          "settings": {
+            "title": "Step 2 — Moisturise",
+            "text": "<p>Cloud Whip Barrier Restore Moisturiser locks in hydration and supports your skin barrier.</p>",
+            "link_label": "Shop the moisturiser",
+            "link": "shopify://products/cloud-whip-moisturiser"
+          }
+        }
+      },
+      "block_order": [
+        "step_treat",
+        "step_moisturise"
+      ],
+      "settings": {
+        "title": "Your 2-step routine",
+        "heading_size": "h1",
+        "image_width": "full",
+        "image_ratio": "adapt",
+        "button_label": "",
+        "button_link": "",
+        "columns_desktop": 2,
+        "column_alignment": "left",
+        "background_style": "none",
+        "color_scheme": "scheme-1",
+        "columns_mobile": "1",
+        "swipe_on_mobile": false,
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    },
     "featured_collection": {
       "type": "featured-collection",
       "settings": {
-        "title": "Featured products",
+        "title": "Shop all",
         "heading_size": "h2",
         "description": "",
         "show_description": false,
         "description_style": "body",
-        "collection": "all",
-        "products_to_show": 8,
-        "columns_desktop": 4,
+        "collection": "shop-all",
+        "products_to_show": 3,
+        "columns_desktop": 3,
         "color_scheme": "scheme-1",
         "full_width": false,
         "show_view_all": true,
@@ -70,6 +120,7 @@
   },
   "order": [
     "image_banner",
+    "routine_steps",
     "featured_collection"
   ]
 }
