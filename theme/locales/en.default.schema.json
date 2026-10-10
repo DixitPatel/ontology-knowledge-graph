@@ -378,6 +378,9 @@
     "am_i_for_you": {
       "name": "Am I for you?"
     },
+    "intent_prompt": {
+      "name": "Is this right for you?"
+    },
     "all": {
       "animation": {
         "content": "Animations",

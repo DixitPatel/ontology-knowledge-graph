@@ -57,7 +57,18 @@
         keepalive: true,
       }).catch(function () {});
     }
+
+    // Let other scripts (e.g. intent-prompt.js) react to fresh signal
+    // without each one re-implementing the transport/session-id logic.
+    document.dispatchEvent(
+      new CustomEvent("oneself:signal", { detail: { event_name: eventName } })
+    );
   }
+
+  window.OneselfEvents = {
+    send: sendEvent,
+    sessionId: SESSION_ID,
+  };
 
   // --- standard events (via Shopify's standard-events.js, already wired
   // into Dawn's product/collection/cart components). These extend the
@@ -71,7 +82,10 @@
     var product = e.product;
     if (!product) return;
     sendEvent("product_viewed", { product_handle: product.handle });
-    trackProductHop(product.handle);
+    // Only treat an actual product-page visit as a "hop" -- a related-product
+    // or search-result card merely scrolling into view isn't the shopper
+    // navigating between products.
+    if (e.context === "page") trackProductHop(product.handle);
   });
 
   document.addEventListener("shopify:collection:view", function (e) {

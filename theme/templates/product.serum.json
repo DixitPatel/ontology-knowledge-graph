@@ -138,11 +138,16 @@
         "padding_top": 36,
         "padding_bottom": 28
       }
+    },
+    "intent_prompt": {
+      "type": "intent-prompt",
+      "settings": {}
     }
   },
   "order": [
     "main",
     "am_i_for_you",
-    "related-products"
+    "related-products",
+    "intent_prompt"
   ]
 }

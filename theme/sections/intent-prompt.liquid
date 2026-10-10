@@ -1,0 +1,98 @@
+{%- comment -%}
+  In-page "is this right for you?" prompt. Hidden by default; shown by
+  intent-prompt.js when the backend's GET /intent says the session's
+  signal is strong enough to ask a question. Product pages only.
+{%- endcomment -%}
+
+<div id="oneself-intent-prompt" class="oneself-intent-prompt color-scheme-1" hidden>
+  <button
+    type="button"
+    class="oneself-intent-prompt__dismiss"
+    aria-label="{{ 'sections.intent_prompt.dismiss' | t }}"
+  >
+    &times;
+  </button>
+  <p class="oneself-intent-prompt__question"></p>
+  <div class="oneself-intent-prompt__options" role="group"></div>
+</div>
+
+{% stylesheet %}
+  .oneself-intent-prompt {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 100;
+    max-width: 28rem;
+    padding: 1.6rem;
+    background: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+    border: 0.1rem solid rgba(var(--color-foreground), 0.15);
+    border-radius: var(--inputs-radius, 0.4rem);
+    box-shadow: 0 0.4rem 1.6rem rgba(var(--color-foreground), 0.2);
+  }
+
+  .oneself-intent-prompt[hidden] {
+    display: none;
+  }
+
+  .oneself-intent-prompt__dismiss {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.8rem;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    line-height: 1;
+    cursor: pointer;
+    color: rgb(var(--color-foreground));
+  }
+
+  .oneself-intent-prompt__question {
+    margin: 0 1.6rem 1rem 0;
+    font-weight: 600;
+  }
+
+  .oneself-intent-prompt__options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .oneself-intent-prompt__option {
+    padding: 0.6rem 1.2rem;
+    border: 0.1rem solid rgba(var(--color-foreground), 0.3);
+    border-radius: var(--inputs-radius, 0.4rem);
+    background: transparent;
+    color: rgb(var(--color-foreground));
+    cursor: pointer;
+    font-size: 1.4rem;
+  }
+
+  .oneself-intent-prompt__option:hover {
+    background: rgba(var(--color-foreground), 0.08);
+  }
+
+  @media screen and (max-width: 740px) {
+    .oneself-intent-prompt {
+      left: 1rem;
+      right: 1rem;
+      bottom: 1rem;
+      max-width: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:sections.intent_prompt.name",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [],
+  "presets": [
+    {
+      "name": "t:sections.intent_prompt.name"
+    }
+  ]
+}
+{% endschema %}

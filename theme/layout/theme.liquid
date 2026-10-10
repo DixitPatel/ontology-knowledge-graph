@@ -69,6 +69,7 @@
       window.ONESELF_PRODUCT_HANDLE = {% if template.name == 'product' %}{{ product.handle | json }}{% else %}null{% endif %};
     </script>
     <script src="{{ 'oneself-events.js' | asset_url }}" defer="defer"></script>
+    <script src="{{ 'intent-prompt.js' | asset_url }}" defer="defer"></script>
 
     {{ content_for_header }}
 

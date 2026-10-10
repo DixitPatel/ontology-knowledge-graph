@@ -276,6 +276,10 @@
       "not_verified": "We don't have verified information to confirm this.",
       "strength_not_verified": "strength not verified, patch test before first use."
     },
+    "intent_prompt": {
+      "name": "Is this right for you?",
+      "dismiss": "Dismiss"
+    },
     "announcements": {
       "previous_announcement": "Previous announcement",
       "next_announcement": "Next announcement",
