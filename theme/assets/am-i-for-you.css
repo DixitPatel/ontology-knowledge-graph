@@ -145,11 +145,54 @@
   outline: 2px solid var(--aify-brand);
   outline-offset: 2px;
 }
+/* ---------- loading ---------- */
+.aify-loading {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 20px;
+  text-align: center;
+  color: var(--aify-muted);
+  font-size: 13px;
+}
+.aify-loading[hidden] {
+  display: none;
+}
+.aify-loading-bar {
+  width: 160px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--aify-line);
+  overflow: hidden;
+}
+.aify-loading-bar span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: var(--aify-brand);
+  border-radius: 999px;
+  animation-name: aify-loading-fill;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+@keyframes aify-loading-fill {
+  to {
+    width: 100%;
+  }
+}
+
 .aify-tabs {
   display: flex;
   gap: 8px;
   padding: 0 20px 12px;
   overflow-x: auto;
+}
+.aify-tabs[hidden],
+.aify-body[hidden] {
+  display: none;
 }
 .aify-tab {
   border: 1px solid var(--aify-line);
@@ -381,7 +424,8 @@
   .aify-scrim,
   .aify-trigger .dot,
   .aify-card,
-  .aify-dag .aify-edge {
+  .aify-dag .aify-edge,
+  .aify-loading-bar span {
     animation: none !important;
     transition: none !important;
   }
@@ -391,5 +435,8 @@
   }
   .aify-dag .aify-edge {
     stroke-dashoffset: 0;
+  }
+  .aify-loading-bar span {
+    width: 100%;
   }
 }

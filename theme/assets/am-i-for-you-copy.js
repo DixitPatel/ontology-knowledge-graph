@@ -10,6 +10,7 @@ const COPY = {
   "trigger.label": "Am I for you?",
   "head.greeting": (name) => `Hi ${name}, welcome back`,
   "head.sub": "Here is what we know about your skin.",
+  "loading.message": "Loading your personal skincare knowledge graph...",
   "tab.skin": "Skin",
   "tab.skin_routine": "Skin & Routine",
   "tab.constraints": "Avoid & budget",
