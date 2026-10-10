@@ -11,6 +11,7 @@ const COPY = {
   "head.greeting": (name) => `Hi ${name}, welcome back`,
   "head.sub": "Here is what we know about your skin.",
   "tab.skin": "Skin",
+  "tab.skin_routine": "Skin & Routine",
   "tab.constraints": "Avoid & budget",
   "tab.purchases": "Purchases",
   "tab.routine": "Routine",
