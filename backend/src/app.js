@@ -3,6 +3,7 @@ import cors from "cors";
 import { scoreEvents } from "./scoring.js";
 import { QUESTIONS, ASK_THRESHOLD } from "./questions.js";
 import { getOntologyResult } from "./ontology.js";
+import { renderSessionDebugHtml } from "./debugView.js";
 
 const ALLOWED_ORIGINS = [
   "http://127.0.0.1:9292",
@@ -58,9 +59,27 @@ export function createApp(db) {
     }));
   }
 
+  const selectSessionAnswers = db.prepare(
+    `SELECT question_id, answer_id, created_at
+     FROM answers
+     WHERE session_id = ?
+     ORDER BY created_at ASC, id ASC`
+  );
+
   app.get("/sessions/:client_id", (req, res) => {
-    const events = getSessionEvents(req.params.client_id);
-    res.json({ session_id: req.params.client_id, events });
+    const sessionId = req.params.client_id;
+    const events = getSessionEvents(sessionId);
+    const answers = selectSessionAnswers.all(sessionId);
+    const { scores } = scoreEvents(events);
+
+    // Only an actual browser navigation sends a literal "text/html" Accept
+    // header; fetch()/curl default to "*/*", which should still get JSON
+    // (session-check.mjs and friends depend on that).
+    const wantsHtml = req.query.format !== "json" && (req.headers.accept || "").includes("text/html");
+    if (wantsHtml) {
+      return res.send(renderSessionDebugHtml(sessionId, events, answers, scores));
+    }
+    res.json({ session_id: sessionId, events, answers, scores });
   });
 
   const upsertSessionScores = db.prepare(
