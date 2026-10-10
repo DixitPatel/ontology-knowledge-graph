@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import { scoreEvents } from "./scoring.js";
+import { QUESTIONS, ASK_THRESHOLD } from "./questions.js";
 
 const ALLOWED_ORIGINS = [
   "http://127.0.0.1:9292",
@@ -46,15 +48,53 @@ export function createApp(db) {
      ORDER BY created_at ASC, id ASC`
   );
 
-  app.get("/sessions/:client_id", (req, res) => {
-    const rows = selectSessionEvents.all(req.params.client_id);
-    const events = rows.map((row) => ({
+  function getSessionEvents(sessionId) {
+    return selectSessionEvents.all(sessionId).map((row) => ({
       event_name: row.event_name,
       product_handle: row.product_handle,
       payload: row.payload ? JSON.parse(row.payload) : null,
       created_at: row.created_at,
     }));
+  }
+
+  app.get("/sessions/:client_id", (req, res) => {
+    const events = getSessionEvents(req.params.client_id);
     res.json({ session_id: req.params.client_id, events });
+  });
+
+  const upsertSessionScores = db.prepare(
+    `INSERT INTO session_scores (session_id, scores, updated_at)
+     VALUES (@session_id, @scores, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+     ON CONFLICT(session_id) DO UPDATE SET scores = @scores, updated_at = excluded.updated_at`
+  );
+
+  app.get("/intent", (req, res) => {
+    const clientId = req.query.client_id;
+    if (!clientId) {
+      return res.status(400).json({ error: "client_id is required" });
+    }
+
+    const product = req.query.product;
+    let events = getSessionEvents(clientId);
+    if (product) {
+      // Score against this product's own signals plus session-wide ones
+      // (e.g. page_viewed on the home page), not another product's.
+      events = events.filter((e) => !e.product_handle || e.product_handle === product);
+    }
+    const { scores, top } = scoreEvents(events);
+
+    upsertSessionScores.run({ session_id: clientId, scores: JSON.stringify(scores) });
+
+    const ask = top !== "general_browsing" && scores[top] >= ASK_THRESHOLD;
+    const questionDef = ask ? QUESTIONS[top] : null;
+
+    res.json({
+      ask,
+      question_id: ask ? top : null,
+      question: questionDef ? questionDef.question : null,
+      options: questionDef ? questionDef.options : null,
+      scores,
+    });
   });
 
   return app;
