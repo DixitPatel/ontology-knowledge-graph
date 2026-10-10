@@ -25,3 +25,22 @@
 | Phase 6 gate | done | `node scripts/demo.mjs` ran both paths twice (4 independent simulated-shopper runs total) with no manual DB edits — the SQLite tables are populated entirely by the storefront JS as the script clicks through the real site. |
 
 ## Status: all 17 tickets done (T1–T17), all 6 phase gates passing.
+
+## Feature: "Am I for you?" personalization panel (`feat/am-i-for-you`, per `docs/HANDOFF-am-i-for-you.md`)
+
+Note: the repo already has an unrelated feature with the exact same name —
+`theme/sections/am-i-for-you.liquid`, the product-tag accordion from T14/T15
+("Suitable skin types / Addresses / Active ingredients"). This panel is a
+separate, much bigger thing (CDP profile + routine DAG in a slide-in panel)
+that happens to share the name. Left the accordion untouched; both will
+show "Am I for you?" on the page until someone decides to rename/merge them.
+
+Also: the handoff assumed an existing "demo controls bar" with a selectable
+shopper (`shopper: e2e1`) to add `customer_003` to. No such bar exists in
+this repo — there's no shopper-switching UI anywhere, just a per-browser
+`oneself_sid` UUID in `oneself-events.js`. Hardcoded `customer_003` as the
+single seed shopper instead (matches the prototype).
+
+| Step | Status | Gate evidence |
+|---|---|---|
+| 1 | done | `theme/assets/am-i-for-you-seed.js` (PROFILE/EXT/CATALOG/PAGES — flattened from the handoff's `seed/*.json`, since Shopify theme assets have no subfolders) + `am-i-for-you-view-model.js` (`getContext`, pure `buildViewModel`). `theme/test/am-i-for-you.test.mjs` via `npm run test:aify` (Node's built-in test runner — no new test framework): 3/3 pass. |

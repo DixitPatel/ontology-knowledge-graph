@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "test:aify": "node --test theme/test/*.test.mjs"
   },
   "devDependencies": {
     "playwright": "^1.48.0"
