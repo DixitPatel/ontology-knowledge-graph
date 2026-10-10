@@ -1,0 +1,8 @@
+query CollectionFind($query: String!) {
+  collections(first: 1, query: $query) {
+    nodes {
+      id
+      handle
+    }
+  }
+}

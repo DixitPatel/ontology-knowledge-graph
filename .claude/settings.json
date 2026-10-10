@@ -1,0 +1,3 @@
+{"permissions":{"defaultMode":"acceptEdits",
+"allow":["Bash(shopify:*)","Bash(npm:*)","Bash(npx:*)","Bash(node:*)","Bash(git add:*)","Bash(git commit:*)","Bash(git status:*)","Bash(git diff:*)","Bash(git log:*)","Bash(curl:*)","Bash(sqlite3:*)","Bash(mkdir:*)","Bash(ls:*)","Bash(cat:*)","Bash(lsof:*)","Bash(kill:*)","Bash(sleep:*)","Bash(cloudflared:*)"],
+"deny":["Bash(git push:*)","Bash(sudo:*)"]}}
