@@ -14,7 +14,7 @@ import { emit } from "./am-i-for-you-events.js";
 // How long the loading moment shows before the tabs/content reveal. Kept
 // as one constant so the JS reveal timing and the CSS fill animation
 // (set as an inline style below, not a CSS file constant) can't drift.
-const LOADING_MS = 900;
+const LOADING_MS = 10000;
 const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 export function createPanel({ sections, vm, initialTab = sections[0]?.id }) {
