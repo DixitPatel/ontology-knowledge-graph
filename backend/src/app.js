@@ -97,5 +97,22 @@ export function createApp(db) {
     });
   });
 
+  const insertAnswer = db.prepare(
+    `INSERT INTO answers (session_id, question_id, answer_id)
+     VALUES (@session_id, @question_id, @answer_id)`
+  );
+
+  app.post("/answers", (req, res) => {
+    const { session_id, question_id, answer_id } = req.body || {};
+    if (!session_id || !question_id || !answer_id) {
+      return res.status(400).json({
+        error: "session_id, question_id and answer_id are required",
+      });
+    }
+    insertAnswer.run({ session_id, question_id, answer_id });
+    // Ontology lookup (verified attributes for this answer) lands in T14/T15.
+    res.status(201).json({ session_id, question_id, answer_id, stored: true });
+  });
+
   return app;
 }

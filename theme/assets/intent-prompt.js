@@ -115,5 +115,30 @@
       product_handle: PRODUCT_HANDLE,
       payload: { question_id: questionId, answer_id: answerId },
     });
+
+    writeCartAttribute(questionId, answerId);
+    storeAnswer(questionId, answerId);
   });
+
+  function writeCartAttribute(questionId, answerId) {
+    var attributes = {};
+    attributes["oneself_intent_" + questionId] = answerId;
+    fetch("/cart/update.js", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ attributes: attributes }),
+    }).catch(function () {});
+  }
+
+  function storeAnswer(questionId, answerId) {
+    fetch(BACKEND_URL + "/answers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        session_id: window.OneselfEvents.sessionId,
+        question_id: questionId,
+        answer_id: answerId,
+      }),
+    }).catch(function () {});
+  }
 })();
