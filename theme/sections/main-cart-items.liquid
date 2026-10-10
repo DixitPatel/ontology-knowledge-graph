@@ -120,6 +120,16 @@
                         -%}
                       </div>
 
+                      {%- if item.product.tags contains 'bundle' -%}
+                        <p class="caption-with-letter-spacing cart-item__oneself-badge">
+                          {{ 'sections.cart.bundle_badge' | t }}
+                        </p>
+                      {%- else -%}
+                        <p class="caption-with-letter-spacing cart-item__oneself-badge">
+                          {{ 'sections.cart.single_badge' | t }}
+                        </p>
+                      {%- endif -%}
+
                       {%- if item.original_price != item.final_price -%}
                         <div class="cart-item__discounted-prices">
                           <span class="visually-hidden">
