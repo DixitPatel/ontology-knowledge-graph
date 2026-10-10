@@ -33,7 +33,7 @@ async function main() {
 
   console.log(`Visiting home: ${BASE_URL}/`);
   await page.goto(`${BASE_URL}/`, { waitUntil: "load" });
-  await page.waitForSelector("text=Your 2-step routine");
+  await page.waitForSelector("text=Your daily skincare routine");
 
   console.log("Visiting shop (Shop All collection)");
   await page.goto(`${BASE_URL}/collections/shop-all`, { waitUntil: "load" });

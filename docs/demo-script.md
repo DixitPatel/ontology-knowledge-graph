@@ -13,7 +13,7 @@ Prerequisites: `shopify theme dev --store $STORE` running on
 
 A shopper is curious about the AHA serum but worried about irritation.
 
-1. Visit the home page. Hero + "Your 2-step routine" section are visible.
+1. Visit the home page. Hero + "Your daily skincare routine" section are visible.
 2. Click through to **Smooth Operator AHA Serum**.
 3. Open the **"What's Inside"** collapsible section — this is where the AHA
    / patch-test info lives.

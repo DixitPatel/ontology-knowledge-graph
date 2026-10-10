@@ -13,7 +13,7 @@ async function runAhaWorryPath(browser) {
   const page = await context.newPage();
 
   await page.goto(`${THEME_URL}/`, { waitUntil: "load" });
-  await page.waitForSelector("text=Your 2-step routine", { state: "attached" });
+  await page.waitForSelector("text=Your daily skincare routine", { state: "attached" });
 
   await page.goto(`${THEME_URL}/products/smooth-operator-aha-serum`, { waitUntil: "load" });
   await page.waitForSelector("text=Am I for you?", { state: "attached" });

@@ -11,7 +11,7 @@ async function main() {
 
   console.log("Visiting home");
   await page.goto(`${THEME_URL}/`, { waitUntil: "load" });
-  await page.waitForSelector("text=Your 2-step routine", { state: "attached" });
+  await page.waitForSelector("text=Your daily skincare routine", { state: "attached" });
 
   console.log("Visiting product page: smooth-operator-aha-serum");
   await page.goto(`${THEME_URL}/products/smooth-operator-aha-serum`, { waitUntil: "load" });
