@@ -1,0 +1,386 @@
+/* "Am I for you?" panel -- styles.
+ * repo: src/am-i-for-you/am-i-for-you.css
+ *
+ * Scoped tokens (not Dawn's --color-* scheme vars): the UX spec
+ * (docs/am-i-for-you-prototype.html) uses its own cream/green palette
+ * deliberately, independent of whichever color scheme a merchant has
+ * picked for scheme-1 -- this panel is meant to look the same everywhere.
+ */
+:root {
+  --aify-bg: #f6f3ee;
+  --aify-surface: #fdfbf7;
+  --aify-ink: #2b2a26;
+  --aify-muted: #6f6b63;
+  --aify-line: #e6e1d8;
+  --aify-brand: #3b7a63;
+  --aify-brand-soft: #e7f0ec;
+  --aify-warn: #a4553a;
+  --aify-warn-soft: #f6e9e3;
+  --aify-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --aify-radius: 14px;
+  --aify-dur: 260ms;
+  --aify-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* ---------- trigger ---------- */
+.aify-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--aify-surface);
+  color: var(--aify-brand);
+  border: 1.5px solid var(--aify-brand);
+  border-radius: 999px;
+  padding: 10px 16px;
+  font: 600 14px inherit;
+  cursor: pointer;
+  transition: background var(--aify-dur) var(--aify-ease);
+}
+.aify-trigger:hover {
+  background: var(--aify-brand-soft);
+}
+.aify-trigger .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--aify-brand);
+  animation: aify-pulse 2s infinite;
+}
+@keyframes aify-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.aify-trigger-row {
+  margin-top: 0.8rem;
+}
+
+/* ---------- panel shell ---------- */
+.aify-scrim {
+  position: fixed;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  appearance: none;
+  background: rgba(43, 42, 38, 0.18);
+  opacity: 0;
+  pointer-events: none;
+  cursor: default;
+  transition: opacity var(--aify-dur) var(--aify-ease);
+  z-index: 9;
+}
+.aify-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: min(440px, 100vw);
+  background: var(--aify-bg);
+  color: var(--aify-ink);
+  font-family: inherit;
+  border-left: 1px solid var(--aify-line);
+  box-shadow: -12px 0 32px rgba(0, 0, 0, 0.06);
+  transform: translateX(100%);
+  transition: transform var(--aify-dur) var(--aify-ease);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+.aify-open .aify-scrim {
+  opacity: 1;
+  pointer-events: auto;
+}
+.aify-open .aify-panel {
+  transform: none;
+}
+.aify-head {
+  padding: 20px 20px 12px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.aify-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--aify-brand);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  flex: none;
+}
+.aify-head h2 {
+  margin: 0;
+  font-size: 18px;
+}
+.aify-head p {
+  margin: 2px 0 0;
+  color: var(--aify-muted);
+  font-size: 13px;
+}
+.aify-close {
+  margin-left: auto;
+  border: 0;
+  background: none;
+  font-size: 22px;
+  color: var(--aify-muted);
+  cursor: pointer;
+  line-height: 1;
+}
+.aify-close:focus-visible,
+.aify-tab:focus-visible {
+  outline: 2px solid var(--aify-brand);
+  outline-offset: 2px;
+}
+.aify-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 0 20px 12px;
+  overflow-x: auto;
+}
+.aify-tab {
+  border: 1px solid var(--aify-line);
+  background: var(--aify-surface);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font: 500 13px inherit;
+  color: var(--aify-ink);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.aify-tab[aria-selected="true"] {
+  border-color: var(--aify-brand);
+  color: var(--aify-brand);
+  background: var(--aify-brand-soft);
+}
+.aify-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 20px 24px;
+}
+.aify-section {
+  display: none;
+}
+.aify-section.active {
+  display: block;
+}
+
+/* ---------- cards ---------- */
+.aify-card {
+  background: var(--aify-surface);
+  border: 1px solid var(--aify-line);
+  border-radius: var(--aify-radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  opacity: 0;
+  transform: translateY(6px);
+  animation: aify-in var(--aify-dur) var(--aify-ease) forwards;
+}
+@keyframes aify-in {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.aify-card h3 {
+  margin: 0 0 10px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--aify-brand);
+}
+.aify-kv {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.aify-mini {
+  background: var(--aify-bg);
+  border-radius: 10px;
+  padding: 10px;
+}
+.aify-mini .aify-k {
+  font-size: 11px;
+  color: var(--aify-muted);
+}
+.aify-mini .aify-v {
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 2px;
+  text-transform: capitalize;
+}
+.aify-prov {
+  font: 11px var(--aify-mono);
+  color: #9a958b;
+  margin-top: 4px;
+}
+.aify-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.aify-chip {
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 13px;
+  background: var(--aify-bg);
+  border: 1px solid var(--aify-line);
+}
+.aify-chip.aify-primary {
+  background: var(--aify-brand-soft);
+  border-color: var(--aify-brand);
+  color: var(--aify-brand);
+}
+.aify-chip.aify-avoid {
+  background: var(--aify-warn-soft);
+  border-color: #e7c9bc;
+  color: var(--aify-warn);
+}
+.aify-chip small {
+  opacity: 0.7;
+  margin-left: 4px;
+}
+.aify-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-top: 1px solid var(--aify-line);
+  font-size: 14px;
+}
+.aify-row:first-of-type {
+  border-top: 0;
+}
+.aify-row .aify-sub {
+  color: var(--aify-muted);
+  font-size: 12px;
+}
+.aify-tag {
+  font: 11px var(--aify-mono);
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--aify-bg);
+}
+.aify-tag.aify-ret {
+  background: var(--aify-warn-soft);
+  color: var(--aify-warn);
+}
+.aify-confirm {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--aify-muted);
+}
+.aify-confirm button {
+  border: 1px solid var(--aify-line);
+  background: var(--aify-surface);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font: 500 12px inherit;
+  cursor: pointer;
+}
+.aify-confirm button.aify-on {
+  background: var(--aify-brand);
+  border-color: var(--aify-brand);
+  color: #fff;
+}
+
+/* ---------- routine dag ---------- */
+.aify-dag svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.aify-dag .aify-lane {
+  font: 600 11px inherit;
+  fill: var(--aify-muted);
+  letter-spacing: 0.08em;
+}
+.aify-dag .aify-node rect {
+  fill: var(--aify-surface);
+  stroke: var(--aify-line);
+  stroke-width: 1.2;
+  transition: stroke var(--aify-dur);
+}
+.aify-dag .aify-node:hover rect,
+.aify-dag .aify-node.aify-sel rect {
+  stroke: var(--aify-brand);
+  stroke-width: 2;
+}
+.aify-dag .aify-node {
+  cursor: pointer;
+  outline: none;
+}
+.aify-dag .aify-node:focus-visible rect {
+  stroke: var(--aify-brand);
+  stroke-width: 2.5;
+}
+.aify-dag .aify-node .aify-t {
+  font: 600 11px inherit;
+  fill: var(--aify-ink);
+}
+.aify-dag .aify-node .aify-s {
+  font: 10px inherit;
+  fill: var(--aify-muted);
+}
+.aify-dag .aify-ghost rect {
+  fill: var(--aify-brand-soft);
+  stroke: var(--aify-brand);
+  stroke-dasharray: 4 3;
+}
+.aify-dag .aify-ghost .aify-t {
+  fill: var(--aify-brand);
+}
+.aify-dag .aify-edge {
+  stroke: #bdb6aa;
+  stroke-width: 1.4;
+  fill: none;
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+  animation: aify-draw 0.6s var(--aify-ease) forwards;
+}
+.aify-dag .aify-edge.aify-ghost-edge {
+  stroke: var(--aify-brand);
+  stroke-dasharray: 4 3;
+  animation: none;
+}
+@keyframes aify-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.aify-dag-detail {
+  margin-top: 10px;
+  font-size: 13px;
+  min-height: 38px;
+  color: var(--aify-muted);
+}
+.aify-dag-detail b {
+  color: var(--aify-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aify-panel,
+  .aify-scrim,
+  .aify-trigger .dot,
+  .aify-card,
+  .aify-dag .aify-edge {
+    animation: none !important;
+    transition: none !important;
+  }
+  .aify-card {
+    opacity: 1;
+    transform: none;
+  }
+  .aify-dag .aify-edge {
+    stroke-dashoffset: 0;
+  }
+}
