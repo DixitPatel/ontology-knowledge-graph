@@ -2,7 +2,10 @@
  * repo: src/am-i-for-you/panel.js
  *
  * Open/close, tabs, lazy render, focus, Esc, scrim. Knows nothing about
- * what a section renders -- sections are {id, tabKey, render(vm), mount?}.
+ * what a section renders -- sections are
+ * {id, tabKey, render(vm), mount?, minWidth?(vm)}. minWidth lets a
+ * section (the routine DAG, so far) ask for a wider panel than the
+ * default --panel-w; omitting it keeps the default width.
  */
 
 import { t } from "./am-i-for-you-copy.js";
@@ -27,6 +30,7 @@ export function createPanel({ sections, vm, initialTab = sections[0]?.id }) {
     </aside>`;
   document.body.appendChild(root);
 
+  const panelEl = root.querySelector(".aify-panel");
   const rendered = new Set();
 
   const select = (id) => {
@@ -35,6 +39,7 @@ export function createPanel({ sections, vm, initialTab = sections[0]?.id }) {
     const el = root.querySelector(`[data-sec="${id}"]`);
     const sec = sections.find((s) => s.id === id);
     if (!sec) return;
+    panelEl.style.width = sec.minWidth ? `min(max(var(--panel-w), ${sec.minWidth(vm)}px), 96vw)` : "";
     if (!rendered.has(id)) {
       el.innerHTML = sec.render(vm);
       sec.mount?.(el, vm);

@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import { getContext, buildViewModel } from "../assets/am-i-for-you-view-model.js";
-import { layoutRoutine } from "../assets/am-i-for-you-section-routine.js";
+import { layoutRoutine, RoutineSection } from "../assets/am-i-for-you-section-routine.js";
 
 test("getContext falls back to no candidate slot for an unmapped handle", () => {
   const ctx = getContext("customer_003", "some-other-product");
@@ -67,4 +67,27 @@ test("layoutRoutine's SVG width grows with a longer lane instead of clipping it"
   const layout = layoutRoutine(vm);
   const rightmostEdge = Math.max(...layout.nodes.map((n) => n.x + n.w));
   assert.ok(layout.W >= rightmostEdge + 4, "width must extend past the last node in the longest lane");
+});
+
+test("a 4-node AM lane (3 real steps + the candidate ghost) lays out with no overlap", () => {
+  // smooth-operator-aha-serum's candidate_slot is in the AM lane, before
+  // the existing azelaic acid treatment -- this is the "4 AM nodes" case
+  // that used to clip/spill text before the wider panel + bigger nodes.
+  const ctx = getContext("customer_003", "smooth-operator-aha-serum");
+  const vm = buildViewModel(ctx.profile, ctx.ext, ctx.catalog, ctx.page);
+  const layout = layoutRoutine(vm.routine);
+
+  const amNodes = layout.nodes.filter((n) => n.lane === "am").sort((a, b) => a.x - b.x);
+  assert.equal(amNodes.length, 4);
+  for (let i = 1; i < amNodes.length; i++) {
+    assert.ok(amNodes[i].x >= amNodes[i - 1].x + amNodes[i - 1].w, "nodes in a lane must not overlap");
+  }
+  assert.equal(amNodes.find((n) => n.kind === "ghost").id, amNodes[1].id, "ghost sits before step 2");
+});
+
+test("RoutineSection.minWidth matches layoutRoutine's width plus the panel's side padding", () => {
+  const ctx = getContext("customer_003", "smooth-operator-aha-serum");
+  const vm = buildViewModel(ctx.profile, ctx.ext, ctx.catalog, ctx.page);
+  const layout = layoutRoutine(vm.routine);
+  assert.equal(RoutineSection.minWidth(vm), layout.W + 80);
 });

@@ -20,6 +20,9 @@
   --aify-radius: 14px;
   --aify-dur: 260ms;
   --aify-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* Default panel width. A section can ask for more (see routine's
+     minWidth) when its content -- the DAG -- doesn't fit this. */
+  --panel-w: clamp(520px, 44vw, 680px);
 }
 
 /* ---------- trigger ---------- */
@@ -83,14 +86,14 @@
   top: 0;
   right: 0;
   height: 100%;
-  width: min(440px, 100vw);
+  width: min(var(--panel-w), 100vw);
   background: var(--aify-bg);
   color: var(--aify-ink);
   font-family: inherit;
   border-left: 1px solid var(--aify-line);
   box-shadow: -12px 0 32px rgba(0, 0, 0, 0.06);
   transform: translateX(100%);
-  transition: transform var(--aify-dur) var(--aify-ease);
+  transition: transform var(--aify-dur) var(--aify-ease), width var(--aify-dur) var(--aify-ease);
   display: flex;
   flex-direction: column;
   z-index: 10;
@@ -298,10 +301,12 @@
 }
 
 /* ---------- routine dag ---------- */
+.dag-scroll {
+  overflow-x: auto;
+}
 .aify-dag svg {
-  width: 100%;
-  height: auto;
   display: block;
+  max-width: none;
 }
 .aify-dag .aify-lane {
   font: 600 11px inherit;
@@ -328,11 +333,11 @@
   stroke-width: 2.5;
 }
 .aify-dag .aify-node .aify-t {
-  font: 600 11px inherit;
+  font: 600 12px inherit;
   fill: var(--aify-ink);
 }
 .aify-dag .aify-node .aify-s {
-  font: 10px inherit;
+  font: 11px inherit;
   fill: var(--aify-muted);
 }
 .aify-dag .aify-ghost rect {
