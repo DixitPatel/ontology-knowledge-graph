@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Am I For You</title>
+<style>
+:root{
+  --bg:#f6f3ee; --surface:#fdfbf7; --ink:#2b2a26; --muted:#6f6b63; --line:#e6e1d8;
+  --brand:#3b7a63; --brand-soft:#e7f0ec; --warn:#a4553a; --warn-soft:#f6e9e3;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:Inter,system-ui,-apple-system,Segoe UI,sans-serif;
+  --radius:14px; --dur:260ms; --ease:cubic-bezier(.2,.8,.2,1);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans)}
+/* ---------- mock host page (not part of the module) ---------- */
+.host-bar{background:#2b2a26;color:#eee;padding:10px 16px;font-size:13px}
+.host-brand{padding:14px 16px;border-bottom:1px solid var(--line);background:var(--surface);font-size:14px}
+.host-brand b{letter-spacing:.12em}
+.host{max-width:860px;margin:24px auto;padding:0 16px;display:flex;gap:20px;flex-wrap:wrap}
+.host-img{width:200px;height:260px;border-radius:var(--radius);background:linear-gradient(#ece6dc,#dccfbd);display:grid;place-items:center;color:var(--muted);font-size:13px}
+.host h1{margin:24px 0 8px;font-size:28px}
+.host p{color:var(--muted);margin:0 0 12px}
+.cta-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{border:0;border-radius:10px;padding:12px 20px;font:600 15px var(--sans);cursor:pointer}
+.btn-primary{background:var(--brand);color:#fff}
+
+/* ---------- module: trigger ---------- */
+.aify-trigger{display:inline-flex;align-items:center;gap:8px;background:var(--surface);color:var(--brand);
+  border:1.5px solid var(--brand);border-radius:999px;padding:10px 16px;font:600 14px var(--sans);cursor:pointer;
+  transition:background var(--dur) var(--ease)}
+.aify-trigger:hover{background:var(--brand-soft)}
+.aify-trigger .dot{width:8px;height:8px;border-radius:50%;background:var(--brand);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ---------- module: panel shell ---------- */
+.aify-scrim{position:fixed;inset:0;background:rgba(43,42,38,.18);opacity:0;pointer-events:none;transition:opacity var(--dur) var(--ease)}
+.aify-panel{position:fixed;top:0;right:0;height:100%;width:min(440px,100vw);background:var(--bg);
+  border-left:1px solid var(--line);box-shadow:-12px 0 32px rgba(0,0,0,.06);transform:translateX(100%);
+  transition:transform var(--dur) var(--ease);display:flex;flex-direction:column;z-index:10}
+.aify-open .aify-scrim{opacity:1;pointer-events:auto}
+.aify-open .aify-panel{transform:none}
+.aify-head{padding:20px 20px 12px;display:flex;gap:12px;align-items:flex-start}
+.aify-avatar{width:40px;height:40px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:600;flex:none}
+.aify-head h2{margin:0;font-size:18px}
+.aify-head p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.aify-close{margin-left:auto;border:0;background:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1}
+.aify-tabs{display:flex;gap:8px;padding:0 20px 12px;overflow-x:auto}
+.aify-tab{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font:500 13px var(--sans);
+  color:var(--ink);cursor:pointer;white-space:nowrap}
+.aify-tab[aria-selected=true]{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
+.aify-body{flex:1;overflow-y:auto;padding:4px 20px 24px}
+.aify-section{display:none}
+.aify-section.active{display:block}
+
+/* ---------- cards ---------- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:12px;
+  opacity:0;transform:translateY(6px);animation:in var(--dur) var(--ease) forwards}
+@keyframes in{to{opacity:1;transform:none}}
+.card h3{margin:0 0 10px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--brand)}
+.kv{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.mini{background:var(--bg);border-radius:10px;padding:10px}
+.mini .k{font-size:11px;color:var(--muted)}
+.mini .v{font-size:15px;font-weight:600;margin-top:2px;text-transform:capitalize}
+.prov{font:11px var(--mono);color:#9a958b;margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border-radius:999px;padding:5px 10px;font-size:13px;background:var(--bg);border:1px solid var(--line)}
+.chip.primary{background:var(--brand-soft);border-color:var(--brand);color:var(--brand)}
+.chip.avoid{background:var(--warn-soft);border-color:#e7c9bc;color:var(--warn)}
+.chip small{opacity:.7;margin-left:4px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.row:first-of-type{border-top:0}
+.row .sub{color:var(--muted);font-size:12px}
+.tag{font:11px var(--mono);padding:2px 6px;border-radius:6px;background:var(--bg)}
+.tag.ret{background:var(--warn-soft);color:var(--warn)}
+.confirm{display:flex;gap:8px;align-items:center;margin-top:12px;font-size:13px;color:var(--muted)}
+.confirm button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font:500 12px var(--sans);cursor:pointer}
+.confirm button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+
+/* ---------- routine dag ---------- */
+.dag svg{width:100%;height:auto;display:block}
+.dag .lane{font:600 11px var(--sans);fill:var(--muted);letter-spacing:.08em}
+.dag .node rect{fill:var(--surface);stroke:var(--line);stroke-width:1.2;transition:stroke var(--dur)}
+.dag .node:hover rect,.dag .node.sel rect{stroke:var(--brand);stroke-width:2}
+.dag .node{cursor:pointer;outline:none}
+.dag .node:focus-visible rect{stroke:var(--brand);stroke-width:2.5}
+.dag .node .t{font:600 11px var(--sans);fill:var(--ink)}
+.dag .node .s{font:10px var(--sans);fill:var(--muted)}
+.dag .ghost rect{fill:var(--brand-soft);stroke:var(--brand);stroke-dasharray:4 3}
+.dag .ghost .t{fill:var(--brand)}
+.dag .edge{stroke:#bdb6aa;stroke-width:1.4;fill:none;stroke-dasharray:200;stroke-dashoffset:200;animation:draw .6s var(--ease) forwards}
+.dag .edge.ghost-edge{stroke:var(--brand);stroke-dasharray:4 3;animation:none}
+@keyframes draw{to{stroke-dashoffset:0}}
+.dag-detail{margin-top:10px;font-size:13px;min-height:38px;color:var(--muted)}
+.dag-detail b{color:var(--ink)}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  .card{opacity:1;transform:none}
+  .dag .edge{stroke-dashoffset:0}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== mock host page (stands in for /products/glow-barrier-duo) ===== -->
+<div class="host-bar">Demo controls · shopper: customer_003</div>
+<div class="host-brand"><b>FERNHOLLOW SKIN</b> · fictional demo brand</div>
+<main class="host">
+  <div class="host-img">Glow Barrier Duo</div>
+  <div>
+    <h1>Glow Barrier Duo</h1>
+    <p>Formulated to support the skin barrier.</p>
+    <p style="color:var(--ink);font-size:20px">$48</p>
+    <div class="cta-row">
+      <button class="btn btn-primary">Add to bag</button>
+      <span id="aify-mount"></span>
+    </div>
+  </div>
+</main>
+
+<script>
+/* =====================================================================
+   SEED DATA  (repo: src/am-i-for-you/seed/*.json)
+   ===================================================================== */
+const PROFILE = {
+  schema_version:"1.1", customer_id:"customer_003",
+  beauty_profile:{
+    skin:{
+      type:{value:"dry",source:"self_reported_quiz",observed_at:"2026-03-02",confidence:0.7},
+      sensitivity:{value:"sensitive",source:"self_reported_quiz",observed_at:"2026-03-02",confidence:0.9},
+      fitzpatrick_type:{value:"I",source:"in_store_scan",observed_at:"2026-04-15",confidence:0.95},
+      age_band:"35-44", climate:"coastal_mild"
+    },
+    concerns:[
+      {id:"rosacea",rank:"primary",severity:"moderate",source:"self_reported_quiz"},
+      {id:"redness",rank:"secondary",severity:"moderate",source:"self_reported_quiz"},
+      {id:"dryness",rank:"secondary",severity:"mild",source:"advisor_note"}
+    ],
+    goals:[{id:"calm_redness"},{id:"simple_routine"}],
+    preferences:{
+      avoid_ingredients:[
+        {ingredient:"fragrance",reason:"preference"},
+        {ingredient:"essential_oils",reason:"preference"},
+        {ingredient:"glycolic_acid",reason:"advisor_recommendation"},
+        {ingredient:"witch_hazel",reason:"reaction"}
+      ],
+      reported_reactions:[{ingredient:"witch_hazel",product_sku:"SK-TONER-112",effect:"stinging",severity:"mild",observed_at:"2026-05-20",source:"return_reason"}],
+      budget:{tier:"mid",currency:"USD",max_per_product:60}
+    },
+    routine:{
+      observed_at:"2026-09-01",
+      am:[
+        {step:1,product_type:"cleanser",key_ingredient:null,sku:"SK-CLN-201"},
+        {step:2,product_type:"treatment",key_ingredient:"azelaic_acid",sku:"SK-AZA-010"},
+        {step:3,product_type:"sunscreen",key_ingredient:"zinc_oxide",sku:"SK-SPF-330"}
+      ],
+      pm:[
+        {step:1,product_type:"cleanser",key_ingredient:null,sku:"SK-CLN-201"},
+        {step:2,product_type:"moisturizer",key_ingredient:"ceramides",sku:"SK-MST-045"}
+      ]
+    }
+  }
+};
+/* Extensions the 1.1 schema lacks. Kept separate so the schema stays untouched. */
+const EXT = {
+  display_name:"Maya",
+  purchases:[
+    {order_id:"FH-1042",date:"2026-09-01",sku:"SK-MST-045",qty:1,status:"delivered"},
+    {order_id:"FH-1042",date:"2026-09-01",sku:"SK-AZA-010",qty:1,status:"delivered"},
+    {order_id:"FH-0988",date:"2026-07-12",sku:"SK-SPF-330",qty:2,status:"delivered"},
+    {order_id:"FH-0921",date:"2026-05-09",sku:"SK-TONER-112",qty:1,status:"returned",return_reason:"stinging"},
+    {order_id:"FH-0870",date:"2026-03-02",sku:"SK-CLN-201",qty:1,status:"delivered"}
+  ]
+};
+const CATALOG = {
+  "SK-CLN-201":{name:"Daily Kit Gel Cleanser",price:14},
+  "SK-AZA-010":{name:"Quiet Tone Azelaic 10%",price:32},
+  "SK-SPF-330":{name:"Shoreline Mineral SPF 30",price:28},
+  "SK-MST-045":{name:"Still Water Barrier Cream",price:34},
+  "SK-TONER-112":{name:"Mist Hazel Toner",price:22},
+  "SK-GBD-500":{name:"Glow Barrier Duo",price:48}
+};
+/* Page context. Later: decision engine supplies candidate_slot. */
+const PAGE = {handle:"glow-barrier-duo",sku:"SK-GBD-500",candidate_slot:{lane:"pm",before_step:2}};
+
+/* =====================================================================
+   COPY  (repo: src/am-i-for-you/copy.js) — every visible string has a key.
+   Coframe varies these keys; components never hardcode text.
+   ===================================================================== */
+const COPY = {
+  "trigger.label":"Am I for you?",
+  "head.greeting":name=>`Hi ${name}, welcome back`,
+  "head.sub":"Here is what we know about your skin.",
+  "tab.skin":"Skin","tab.constraints":"Avoid & budget","tab.purchases":"Purchases","tab.routine":"Routine",
+  "skin.title":"Skin profile","skin.concerns":"Concerns","skin.goals":"Goals",
+  "skin.confirm":"Is this still right?","skin.yes":"Yes","skin.changed":"Something changed",
+  "con.avoid":"You avoid","con.reactions":"Past reactions","con.budget":"Budget",
+  "pur.title":"Recent purchases",
+  "rt.title":"Your routine","rt.hint":"Tap a step for details.",
+  "rt.ghost":"This product?"
+};
+const t = (k,...a)=>{const v=COPY[k];return typeof v==="function"?v(...a):(v??k)};
+
+/* =====================================================================
+   EVENT BUS  (repo: src/am-i-for-you/events.js)
+   Output contract. Later: forward to CDP as zero-party data + Coframe goals.
+   ===================================================================== */
+const emit=(type,payload={})=>{
+  const evt={type,customer_id:PROFILE.customer_id,page:PAGE.handle,ts:new Date().toISOString(),...payload};
+  window.dispatchEvent(new CustomEvent("aify:event",{detail:evt}));
+  console.log("[aify]",evt);
+};
+
+/* =====================================================================
+   VIEW MODEL  (repo: src/am-i-for-you/viewModel.js)
+   Pure function: CDP profile + extensions + catalog -> what the UI shows.
+   ===================================================================== */
+const human=s=>s?s.replace(/_/g," "):"";
+function buildViewModel(p,ext,cat,page){
+  const bp=p.beauty_profile;
+  const prov=f=>`${human(f.source)} · ${f.observed_at} · ${f.confidence}`;
+  return {
+    name:ext.display_name,
+    skin:{
+      fields:[
+        {k:"Type",v:bp.skin.type.value,prov:prov(bp.skin.type)},
+        {k:"Sensitivity",v:bp.skin.sensitivity.value,prov:prov(bp.skin.sensitivity)},
+        {k:"Fitzpatrick",v:bp.skin.fitzpatrick_type.value,prov:prov(bp.skin.fitzpatrick_type)},
+        {k:"Age · climate",v:`${bp.skin.age_band} · ${human(bp.skin.climate)}`,prov:""}
+      ],
+      concerns:bp.concerns.map(c=>({label:human(c.id),rank:c.rank,severity:c.severity})),
+      goals:bp.goals.map(g=>human(g.id))
+    },
+    constraints:{
+      avoid:bp.preferences.avoid_ingredients.map(a=>({label:human(a.ingredient),reason:human(a.reason)})),
+      reactions:bp.preferences.reported_reactions.map(r=>({
+        label:human(r.ingredient),product:cat[r.product_sku]?.name??r.product_sku,effect:r.effect,date:r.observed_at})),
+      budget:bp.preferences.budget
+    },
+    purchases:ext.purchases.map(o=>({...o,name:cat[o.sku]?.name??o.sku,price:cat[o.sku]?.price})),
+    routine:{
+      observed_at:bp.routine.observed_at,
+      lanes:["am","pm"].map(l=>({id:l,steps:bp.routine[l].map(s=>({...s,name:cat[s.sku]?.name??s.sku}))})),
+      ghost:page.candidate_slot?{...page.candidate_slot,name:cat[page.sku]?.name??page.sku}:null
+    }
+  };
+}
+
+/* =====================================================================
+   SECTIONS  (repo: src/am-i-for-you/sections/*.js)
+   Registry: each section = {id, tabKey, render(vm) -> HTML string, mount?(el, vm)}.
+   Coframe can reorder, hide, or swap a section by id.
+   ===================================================================== */
+const SkinSection={
+  id:"skin",tabKey:"tab.skin",
+  render:vm=>`
+   <div class="card" data-cf-slot="skin.profile">
+     <h3>${t("skin.title")}</h3>
+     <div class="kv">${vm.skin.fields.map(f=>`
+       <div class="mini"><div class="k">${f.k}</div><div class="v">${f.v}</div>${f.prov?`<div class="prov">${f.prov}</div>`:""}</div>`).join("")}
+     </div>
+     <div class="confirm" data-cf-slot="skin.confirm">${t("skin.confirm")}
+       <button data-ans="yes">${t("skin.yes")}</button><button data-ans="changed">${t("skin.changed")}</button></div>
+   </div>
+   <div class="card" style="animation-delay:60ms" data-cf-slot="skin.concerns">
+     <h3>${t("skin.concerns")}</h3>
+     <div class="chips">${vm.skin.concerns.map(c=>`<span class="chip ${c.rank==="primary"?"primary":""}">${c.label}<small>${c.severity}</small></span>`).join("")}</div>
+     <h3 style="margin-top:14px">${t("skin.goals")}</h3>
+     <div class="chips">${vm.skin.goals.map(g=>`<span class="chip">${g}</span>`).join("")}</div>
+   </div>`,
+  mount:(el)=>el.querySelectorAll("[data-ans]").forEach(b=>b.onclick=()=>{
+    el.querySelectorAll("[data-ans]").forEach(x=>x.classList.toggle("on",x===b));
+    emit("profile_confirmation",{field:"skin",answer:b.dataset.ans});
+  })
+};
+
+const ConstraintsSection={
+  id:"constraints",tabKey:"tab.constraints",
+  render:vm=>`
+   <div class="card" data-cf-slot="constraints.avoid">
+     <h3>${t("con.avoid")}</h3>
+     <div class="chips">${vm.constraints.avoid.map(a=>`<span class="chip avoid">${a.label}<small>${a.reason}</small></span>`).join("")}</div>
+   </div>
+   <div class="card" style="animation-delay:60ms" data-cf-slot="constraints.reactions">
+     <h3>${t("con.reactions")}</h3>
+     ${vm.constraints.reactions.map(r=>`<div class="row"><div>${r.label} — ${r.effect}<div class="sub">${r.product} · ${r.date}</div></div><span class="tag ret">reaction</span></div>`).join("")}
+   </div>
+   <div class="card" style="animation-delay:120ms" data-cf-slot="constraints.budget">
+     <h3>${t("con.budget")}</h3>
+     <div class="kv"><div class="mini"><div class="k">Tier</div><div class="v">${vm.constraints.budget.tier}</div></div>
+     <div class="mini"><div class="k">Max per product</div><div class="v">$${vm.constraints.budget.max_per_product}</div></div></div>
+   </div>`
+};
+
+const PurchasesSection={
+  id:"purchases",tabKey:"tab.purchases",
+  render:vm=>`
+   <div class="card" data-cf-slot="purchases.list">
+     <h3>${t("pur.title")}</h3>
+     ${vm.purchases.map(o=>`<div class="row"><div>${o.name}<div class="sub">${o.date} · $${o.price}${o.qty>1?` × ${o.qty}`:""}</div></div>
+       <span class="tag ${o.status==="returned"?"ret":""}">${o.status}</span></div>`).join("")}
+   </div>`
+};
+
+/* Routine DAG: layout is computed (pure), then drawn as SVG. No graph library. */
+function layoutRoutine(r){
+  const W=400,NW=104,NH=46,GAP=28,LANE_H=86,TOP=26,LEFT=34;
+  const nodes=[],edges=[];
+  r.lanes.forEach((lane,li)=>{
+    let steps=lane.steps.map(s=>({...s,kind:"step"}));
+    if(r.ghost&&r.ghost.lane===lane.id){
+      const i=steps.findIndex(s=>s.step===r.ghost.before_step);
+      steps.splice(i<0?steps.length:i,0,{kind:"ghost",name:r.ghost.name,product_type:t("rt.ghost")});
+    }
+    const y=TOP+li*LANE_H;
+    steps.forEach((s,i)=>{
+      const n={...s,id:`${lane.id}-${i}`,lane:lane.id,x:LEFT+i*(NW+GAP),y,w:NW,h:NH};
+      nodes.push(n);
+      if(i>0){const p=nodes[nodes.length-2];edges.push({from:p,to:n,ghost:s.kind==="ghost"||p.kind==="ghost"});}
+    });
+  });
+  const maxX=Math.max(...nodes.map(n=>n.x+n.w));
+  return {W:Math.max(W,maxX+4),H:TOP+r.lanes.length*LANE_H-20,nodes,edges};
+}
+const clip=(s,n)=>s.length>n?s.slice(0,n-1)+"…":s;
+const RoutineSection={
+  id:"routine",tabKey:"tab.routine",
+  render:vm=>{
+    const L=layoutRoutine(vm.routine);
+    const lanes=vm.routine.lanes.map((l,i)=>`<text class="lane" x="0" y="${26+i*86+28}">${l.id.toUpperCase()}</text>`).join("");
+    const edges=L.edges.map((e,i)=>{
+      const x1=e.from.x+e.from.w,y=e.from.y+e.from.h/2,x2=e.to.x;
+      return `<path class="edge ${e.ghost?"ghost-edge":""}" style="animation-delay:${i*90}ms" d="M${x1} ${y} H${x2-4}" marker-end="url(#arr)"/>`;}).join("");
+    const nodes=L.nodes.map(n=>`
+      <g class="node ${n.kind==="ghost"?"ghost":""}" data-id="${n.id}" tabindex="0" data-cf-slot="routine.node.${n.kind}">
+        <rect x="${n.x}" y="${n.y}" width="${n.w}" height="${n.h}" rx="10"/>
+        <text class="t" x="${n.x+10}" y="${n.y+19}">${clip(human(n.product_type),15)}</text>
+        <text class="s" x="${n.x+10}" y="${n.y+34}">${clip(n.key_ingredient?human(n.key_ingredient):n.name,17)}</text>
+      </g>`).join("");
+    return `
+     <div class="card dag" data-cf-slot="routine.dag">
+       <h3>${t("rt.title")}</h3>
+       <svg viewBox="0 0 ${L.W} ${L.H}" role="img" aria-label="AM and PM routine">
+         <defs><marker id="arr" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+           <path d="M0 0 L8 4 L0 8z" fill="#bdb6aa"/></marker></defs>
+         ${lanes}${edges}${nodes}
+       </svg>
+       <div class="dag-detail" aria-live="polite">${t("rt.hint")}</div>
+       <div class="prov">observed ${vm.routine.observed_at}</div>
+     </div>`;
+  },
+  mount:(el,vm)=>{
+    const L=layoutRoutine(vm.routine),detail=el.querySelector(".dag-detail");
+    el.querySelectorAll(".node").forEach(g=>{
+      const pick=()=>{
+        el.querySelectorAll(".node").forEach(x=>x.classList.toggle("sel",x===g));
+        const n=L.nodes.find(x=>x.id===g.dataset.id);
+        detail.innerHTML=n.kind==="ghost"
+          ?`<b>${n.name}</b> could slot in here, before your moisturizer.`
+          :`<b>${n.lane.toUpperCase()} step ${n.step}:</b> ${n.name}${n.key_ingredient?` — ${human(n.key_ingredient)}`:""}`;
+        emit("routine_node_selected",{node:n.kind==="ghost"?"candidate":n.sku,lane:n.lane});
+      };
+      g.onclick=pick; g.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick();}};
+    });
+  }
+};
+
+/* Order = default tab order. Coframe experiments edit this array. */
+const SECTIONS=[SkinSection,ConstraintsSection,PurchasesSection,RoutineSection];
+
+/* =====================================================================
+   PANEL SHELL  (repo: src/am-i-for-you/panel.js)
+   ===================================================================== */
+function createPanel({sections,vm,initialTab="skin"}){
+  const root=document.createElement("div");
+  root.innerHTML=`
+   <div class="aify-scrim"></div>
+   <aside class="aify-panel" role="dialog" aria-modal="true" aria-labelledby="aify-title" data-cf-slot="panel">
+     <header class="aify-head">
+       <div class="aify-avatar" aria-hidden="true">${vm.name[0]}</div>
+       <div><h2 id="aify-title">${t("head.greeting",vm.name)}</h2><p>${t("head.sub")}</p></div>
+       <button class="aify-close" aria-label="Close">×</button>
+     </header>
+     <nav class="aify-tabs" role="tablist">${sections.map(s=>`<button class="aify-tab" role="tab" data-tab="${s.id}">${t(s.tabKey)}</button>`).join("")}</nav>
+     <div class="aify-body">${sections.map(s=>`<section class="aify-section" role="tabpanel" data-sec="${s.id}"></section>`).join("")}</div>
+   </aside>`;
+  document.body.appendChild(root);
+  const rendered=new Set();
+  const select=id=>{
+    root.querySelectorAll(".aify-tab").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===id));
+    root.querySelectorAll(".aify-section").forEach(s=>s.classList.toggle("active",s.dataset.sec===id));
+    const el=root.querySelector(`[data-sec="${id}"]`),sec=sections.find(s=>s.id===id);
+    if(!rendered.has(id)){el.innerHTML=sec.render(vm);sec.mount?.(el,vm);rendered.add(id);}  // lazy render
+    emit("tab_viewed",{tab:id});
+  };
+  root.querySelectorAll(".aify-tab").forEach(b=>b.onclick=()=>select(b.dataset.tab));
+  let lastFocus=null;
+  const open=()=>{lastFocus=document.activeElement;document.body.classList.add("aify-open");select(initialTab);
+    root.querySelector(".aify-close").focus();emit("panel_opened");};
+  const close=()=>{document.body.classList.remove("aify-open");lastFocus?.focus();emit("panel_closed");};
+  root.querySelector(".aify-close").onclick=close;
+  root.querySelector(".aify-scrim").onclick=close;
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("aify-open"))close();});
+  return {open,close};
+}
+
+/* =====================================================================
+   ENTRY  (repo: src/am-i-for-you/index.js)
+   ===================================================================== */
+(function init(){
+  const vm=buildViewModel(PROFILE,EXT,CATALOG,PAGE);
+  const panel=createPanel({sections:SECTIONS,vm});
+  const btn=document.createElement("button");
+  btn.className="aify-trigger";btn.dataset.cfSlot="trigger";
+  btn.innerHTML=`<span class="dot"></span>${t("trigger.label")}`;
+  btn.onclick=panel.open;
+  document.getElementById("aify-mount").appendChild(btn);
+})();
+</script>
+</body>
+</html>

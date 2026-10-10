@@ -1,0 +1,5 @@
+query ProductMediaByHandle($query: String!) {
+  products(first: 1, query: $query) {
+    nodes { id handle title media(first: 20) { nodes { id status } } }
+  }
+}

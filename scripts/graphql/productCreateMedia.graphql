@@ -1,0 +1,6 @@
+mutation ProductCreateMedia($productId: ID!, $media: [CreateMediaInput!]!) {
+  productCreateMedia(productId: $productId, media: $media) {
+    media { alt status }
+    mediaUserErrors { field message }
+  }
+}
