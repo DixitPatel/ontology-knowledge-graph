@@ -94,13 +94,12 @@ export function createApp(db) {
       return res.status(400).json({ error: "client_id is required" });
     }
 
-    const product = req.query.product;
-    let events = getSessionEvents(clientId);
-    if (product) {
-      // Score against this product's own signals plus session-wide ones
-      // (e.g. page_viewed on the home page), not another product's.
-      events = events.filter((e) => !e.product_handle || e.product_handle === product);
-    }
+    // `product` (the page the shopper is currently on) isn't used to filter
+    // scoring: where_to_start and value_check are inherently cross-product
+    // (product_hop, cart churn on a different product while comparing), and
+    // a shopper's prior worry about acids on one product page is still
+    // relevant context on another. Score the whole session.
+    const events = getSessionEvents(clientId);
     const { scores, top } = scoreEvents(events);
 
     upsertSessionScores.run({ session_id: clientId, scores: JSON.stringify(scores) });

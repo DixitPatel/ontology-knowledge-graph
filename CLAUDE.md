@@ -25,6 +25,5 @@ Hackathon build. Speed matters. Follow PLAN.md.
 - Playwright for smoke/e2e (`npx playwright` with installed Chromium).
 
 ## Status
-- T1 done: dev store.
-- T2 done: Dawn pulled, theme dev runs.
-- T3 next: `shopify store auth` (human approves once in browser), then scripts/seed.mjs.
+- T1–T17 done. All 6 phase gates pass (see `docs/progress.md` for evidence per ticket).
+- To demo: `cd theme && shopify theme dev --store $STORE` (background) + `cd backend && npm start`, then `node scripts/demo.mjs` or follow `docs/demo-script.md` by hand.
