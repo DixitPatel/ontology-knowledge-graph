@@ -7,4 +7,6 @@
  * across commits 3-6.
  */
 
-export const SECTIONS = [];
+import { SkinSection } from "./am-i-for-you-section-skin.js";
+
+export const SECTIONS = [SkinSection];
