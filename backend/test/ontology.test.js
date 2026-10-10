@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { getOntologyResult } from "../src/ontology.js";
+import { CATALOG } from "../src/catalog.js";
 
 test("unknown product handle returns no attributes, no message", () => {
   const result = getOntologyResult("skin_type_fit", "dry", "not-a-real-product");
@@ -11,7 +12,7 @@ test("unknown product handle returns no attributes, no message", () => {
 
 test("value_check on the duo returns verified price/bundle_contents (known values)", () => {
   const result = getOntologyResult("value_check", "bundle_savings", "glow-barrier-duo");
-  assert.equal(result.verified.price, "18.99");
+  assert.equal(result.verified.price, CATALOG["glow-barrier-duo"].price);
   assert.ok(result.verified.bundle_contents.includes("AHA Serum"));
   // size_ml is unknown for the bundle -- stays unverified, not guessed.
   assert.ok(result.unverified.includes("size_ml"));

@@ -1,0 +1,37 @@
+{
+  "_doc": "Sourced general guidance that replaces 'unknown' values. scope=general means category guidance (AHA / moisturiser), NOT a tested claim about this product. UI must show the source label.",
+  "sources": {
+    "fda_aha": { "name": "U.S. FDA — Alpha Hydroxy Acids", "url": "https://www.fda.gov/cosmetics/ingredients/alpha-hydroxy-acids" },
+    "aad_products": { "name": "American Academy of Dermatology — Get the most from skin care products", "url": "https://www.aad.org/skin-care-secrets/maximize-anti-aging-products" },
+    "aad_dry": { "name": "American Academy of Dermatology — Tips to relieve dry skin", "url": "https://www.aad.org/public/everyday-care/skin-care-basics/dry/dermatologists-tips-relieve-dry-skin" }
+  },
+  "by_product": {
+    "smooth-operator-aha-serum": {
+      "suitable_skin_types": { "text": "AHA exfoliant. If your skin is sensitive, start with one new product at a time. Stop if it stings, burns or tingles.", "source": "aad_products", "scope": "general" },
+      "active_strength": { "text": "Strength is not on the label. Reference: AHA cosmetics are considered safe at 10% or less, pH 3.5 or higher, with daily sun protection.", "source": "fda_aha", "scope": "general" },
+      "patch_test_note": { "text": "Patch test: apply a small amount to the inner forearm twice a day for 4–5 days. No redness or itching? Then use it on your face.", "source": "aad_products", "scope": "general" },
+      "sun_protection": { "text": "AHAs can make skin more likely to sunburn. Use sunscreen daily while you use it and for 1 week after you stop.", "source": "fda_aha", "scope": "general" },
+      "expected_timeline": { "text": "Most treatment products need at least 6 weeks to show results, sometimes up to 3 months.", "source": "aad_products", "scope": "general" }
+    },
+    "cloud-whip-moisturiser": {
+      "suitable_skin_types": { "text": "Dry skin: a cream holds more moisture than a lotion. Sensitive skin: choose fragrance-free products.", "source": "aad_dry", "scope": "general" },
+      "patch_test_note": { "text": "Patch test: apply a small amount to the inner forearm twice a day for 4–5 days before using it on your face.", "source": "aad_products", "scope": "general" },
+      "how_to_apply": { "text": "Apply while skin is still damp, for example right after washing.", "source": "aad_dry", "scope": "general" },
+      "expected_timeline": { "text": "A moisturiser can make fine lines look smoother within a few days.", "source": "aad_products", "scope": "general" }
+    },
+    "glow-barrier-duo": {
+      "suitable_skin_types": { "text": "Contains an AHA exfoliant. If your skin is sensitive, add the serum slowly. Stop if it stings, burns or tingles.", "source": "aad_products", "scope": "general" },
+      "active_strength": { "text": "Serum strength is not on the label. Reference: AHA cosmetics are considered safe at 10% or less, pH 3.5 or higher, with daily sun protection.", "source": "fda_aha", "scope": "general" },
+      "patch_test_note": { "text": "Patch test each product: inner forearm, twice a day for 4–5 days, before facial use.", "source": "aad_products", "scope": "general" },
+      "sun_protection": { "text": "The AHA serum can make skin more likely to sunburn. Use sunscreen daily, and for 1 week after you stop.", "source": "fda_aha", "scope": "general" },
+      "expected_timeline": { "text": "Moisturiser: smoother-looking skin within days. AHA serum: usually at least 6 weeks, up to 3 months.", "source": "aad_products", "scope": "general" },
+      "size_ml": { "text": "30 ml serum + 150 ml moisturiser.", "source": "catalog", "scope": "product" }
+    }
+  },
+  "caution": {
+    "_doc": "Replaces the avoid-rule empty result. Shown when the shopper is sensitive or reacts to acids AND the product has an AHA.",
+    "headline": "Go slowly with this one.",
+    "items": ["patch_test_note", "sun_protection", "active_strength"],
+    "footer": "Stop if it stings, burns or tingles, and ask a dermatologist."
+  }
+}

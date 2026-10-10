@@ -1,0 +1,5 @@
+query ProductsList {
+  products(first: 250) {
+    nodes { id handle status vendor }
+  }
+}

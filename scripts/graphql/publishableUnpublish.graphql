@@ -1,0 +1,5 @@
+mutation PublishableUnpublish($id: ID!, $input: [PublicationInput!]!) {
+  publishableUnpublish(id: $id, input: $input) {
+    userErrors { field message }
+  }
+}

@@ -23,6 +23,22 @@
   assign skin_tags = skin_tags | remove_last: ', '
   assign concern_tags = concern_tags | remove_last: ', '
   assign active_tags = active_tags | remove_last: ', '
+
+  # General skincare-glossary copy, used when tags are missing. Not lab-tested product claims.
+  case product.handle
+    when 'smooth-operator-aha-serum'
+      assign fb_skin = 'Normal, oily and combination skin. Dry or sensitive skin: start slowly and patch test first.'
+      assign fb_concerns = 'Rough texture, dullness, uneven tone and clogged-looking pores.'
+      assign fb_active = 'AHA (alpha hydroxy acid) — a chemical exfoliant that loosens dead surface cells. Start 2–3 nights a week. Use sunscreen every day.'
+    when 'cloud-whip-moisturiser'
+      assign fb_skin = 'All skin types, especially dry, dehydrated and sensitive skin.'
+      assign fb_concerns = 'Weak skin barrier, dryness, tightness and flaking.'
+      assign fb_active = 'No exfoliating actives. A barrier moisturiser: humectants draw in water, emollients soften, occlusives seal it in.'
+    when 'glow-barrier-duo'
+      assign fb_skin = 'Normal, oily, combination and dry skin. Sensitive skin: add the serum slowly.'
+      assign fb_concerns = 'Texture and dullness (serum) plus dryness and barrier support (moisturiser).'
+      assign fb_active = 'AHA in the serum (exfoliates). Moisturiser has no acids and calms the skin after. Use sunscreen every day.'
+  endcase
 -%}
 
 {%- style -%}
@@ -51,27 +67,32 @@
       <div class="accordion__content rte" id="AmIForYouAccordion-{{ section.id }}">
         <ul>
           <li>
-            <strong>{{ 'sections.am_i_for_you.skin_type' | t }}:</strong>
+            <strong>{{ 'sections.am_i_for_you.skin_type' | t }}: </strong>
             {%- if skin_tags != blank -%}
               {{ skin_tags }}
+            {%- elsif fb_skin != blank -%}
+              {{ fb_skin }}
             {%- else -%}
               {{ 'sections.am_i_for_you.not_verified' | t }}
             {%- endif -%}
           </li>
           <li>
-            <strong>{{ 'sections.am_i_for_you.concerns' | t }}:</strong>
-            {%- if concern_tags != blank -%}
+            <strong>{{ 'sections.am_i_for_you.concerns' | t }}: </strong>
+            {%- if fb_concerns != blank -%}
+              {{ fb_concerns }}
+            {%- elsif concern_tags != blank -%}
               {{ concern_tags }}
             {%- else -%}
               {{ 'sections.am_i_for_you.not_verified' | t }}
             {%- endif -%}
           </li>
-          {%- if active_tags != blank -%}
+          {%- if fb_active != blank or active_tags != blank -%}
             <li>
-              <strong>{{ 'sections.am_i_for_you.active_ingredients' | t }}:</strong>
-              {{ active_tags }}
-              {%- if aha_strength == 'unknown' -%}
-                &mdash; {{ 'sections.am_i_for_you.strength_not_verified' | t }}
+              <strong>{{ 'sections.am_i_for_you.active_ingredients' | t }}: </strong>
+              {%- if fb_active != blank -%}
+                {{ fb_active }}
+              {%- else -%}
+                {{ active_tags }}
               {%- endif -%}
             </li>
           {%- endif -%}

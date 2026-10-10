@@ -1,0 +1,5 @@
+query CollectionsList {
+  collections(first: 50) {
+    nodes { id handle }
+  }
+}
