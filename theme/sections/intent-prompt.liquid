@@ -14,6 +14,10 @@
   </button>
   <p class="oneself-intent-prompt__question"></p>
   <div class="oneself-intent-prompt__options" role="group"></div>
+  <div class="oneself-intent-prompt__result" hidden>
+    <p class="oneself-intent-prompt__result-message"></p>
+    <ul class="oneself-intent-prompt__result-attributes"></ul>
+  </div>
 </div>
 
 {% stylesheet %}
@@ -70,6 +74,20 @@
 
   .oneself-intent-prompt__option:hover {
     background: rgba(var(--color-foreground), 0.08);
+  }
+
+  .oneself-intent-prompt__result[hidden] {
+    display: none;
+  }
+
+  .oneself-intent-prompt__result-message {
+    margin: 0 1.6rem 0.6rem 0;
+  }
+
+  .oneself-intent-prompt__result-attributes {
+    margin: 0;
+    padding-left: 1.6rem;
+    font-size: 1.4rem;
   }
 
   @media screen and (max-width: 740px) {

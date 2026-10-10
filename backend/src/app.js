@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import { scoreEvents } from "./scoring.js";
 import { QUESTIONS, ASK_THRESHOLD } from "./questions.js";
+import { getOntologyResult } from "./ontology.js";
 
 const ALLOWED_ORIGINS = [
   "http://127.0.0.1:9292",
@@ -103,15 +104,19 @@ export function createApp(db) {
   );
 
   app.post("/answers", (req, res) => {
-    const { session_id, question_id, answer_id } = req.body || {};
+    const { session_id, question_id, answer_id, product_handle } = req.body || {};
     if (!session_id || !question_id || !answer_id) {
       return res.status(400).json({
         error: "session_id, question_id and answer_id are required",
       });
     }
     insertAnswer.run({ session_id, question_id, answer_id });
-    // Ontology lookup (verified attributes for this answer) lands in T14/T15.
-    res.status(201).json({ session_id, question_id, answer_id, stored: true });
+
+    const ontology = product_handle
+      ? getOntologyResult(question_id, answer_id, product_handle)
+      : { verified: {}, unverified: [], avoid: false, message: null };
+
+    res.status(201).json({ session_id, question_id, answer_id, stored: true, ontology });
   });
 
   return app;

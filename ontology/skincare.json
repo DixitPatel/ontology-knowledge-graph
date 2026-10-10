@@ -1,0 +1,36 @@
+{
+  "edges": {
+    "skin_type_fit": {
+      "requires": ["suitable_skin_types"]
+    },
+    "irritation_risk": {
+      "requires": ["active_ingredients", "active_strength", "patch_test_note"]
+    },
+    "where_to_start": {
+      "requires": ["routine_step"]
+    },
+    "results_timeline": {
+      "requires": ["expected_timeline"]
+    },
+    "value_check": {
+      "requires": ["price", "size_ml", "bundle_contents"]
+    }
+  },
+  "avoid_if": [
+    {
+      "id": "sensitive",
+      "description": "Sensitive AVOID_IF active:aha AND active_strength=unknown",
+      "when": {
+        "answers": [
+          { "question_id": "skin_type_fit", "answer_id": "sensitive" },
+          { "question_id": "irritation_risk", "answer_id": "yes" }
+        ],
+        "product": {
+          "active_ingredients": "aha",
+          "active_strength": "unknown"
+        }
+      }
+    }
+  ],
+  "not_verified_message": "We don't have verified information to confirm this."
+}

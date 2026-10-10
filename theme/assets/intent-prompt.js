@@ -13,6 +13,21 @@
   var questionEl = card.querySelector(".oneself-intent-prompt__question");
   var optionsEl = card.querySelector(".oneself-intent-prompt__options");
   var dismissEl = card.querySelector(".oneself-intent-prompt__dismiss");
+  var resultEl = card.querySelector(".oneself-intent-prompt__result");
+  var resultMessageEl = card.querySelector(".oneself-intent-prompt__result-message");
+  var resultAttributesEl = card.querySelector(".oneself-intent-prompt__result-attributes");
+
+  var ATTRIBUTE_LABELS = {
+    suitable_skin_types: "Suitable skin types",
+    active_ingredients: "Active ingredients",
+    active_strength: "Active strength",
+    patch_test_note: "Patch test",
+    routine_step: "Routine step",
+    expected_timeline: "Expected timeline",
+    price: "Price",
+    size_ml: "Size (ml)",
+    bundle_contents: "Bundle contents",
+  };
 
   var DEBOUNCE_MS = 2000;
   var debounceTimer = null;
@@ -40,6 +55,27 @@
   function hideCard() {
     card.hidden = true;
     currentQuestionId = null;
+    resultEl.hidden = true;
+    questionEl.hidden = false;
+    optionsEl.hidden = false;
+  }
+
+  function showResult(ontology) {
+    questionEl.hidden = true;
+    optionsEl.hidden = true;
+
+    resultAttributesEl.innerHTML = "";
+    var verifiedKeys = Object.keys(ontology.verified || {});
+    verifiedKeys.forEach(function (key) {
+      var li = document.createElement("li");
+      li.textContent = (ATTRIBUTE_LABELS[key] || key) + ": " + ontology.verified[key];
+      resultAttributesEl.appendChild(li);
+    });
+
+    resultMessageEl.textContent = ontology.message || "";
+    resultMessageEl.hidden = !ontology.message;
+    resultEl.hidden = false;
+    card.hidden = false;
   }
 
   function renderOptions(options) {
@@ -109,7 +145,7 @@
     var questionId = currentQuestionId;
     var answerId = button.dataset.answerId;
     answeredThisPage = true;
-    hideCard();
+    currentQuestionId = null; // answered, not dismissed -- don't mark it dismissed below
 
     window.OneselfEvents.send("oneself:intent_answered", {
       product_handle: PRODUCT_HANDLE,
@@ -138,7 +174,15 @@
         session_id: window.OneselfEvents.sessionId,
         question_id: questionId,
         answer_id: answerId,
+        product_handle: PRODUCT_HANDLE,
       }),
-    }).catch(function () {});
+    })
+      .then(function (res) {
+        return res.json();
+      })
+      .then(function (data) {
+        if (data && data.ontology) showResult(data.ontology);
+      })
+      .catch(function () {});
   }
 })();
