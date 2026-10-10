@@ -84,3 +84,7 @@ Verified live: loading block + exact message text visible immediately on click, 
 ### Follow-up: loading duration 900ms → 10s
 
 Request: "That's too short use 10 seconds". Changed the single `LOADING_MS` constant in `am-i-for-you-panel.js` from `900` to `10000` — the bar's inline `animation-duration` is derived from the same constant, so the fill animation still finishes exactly when content reveals. Verified live: loading state still visible at 2s and 8s, reveals at ~10s. No console errors.
+
+### Follow-up: seed shopper name "Maya" → "Dixit"
+
+Request: "rename Maya to Dixit". Changed `EXT.display_name` in `am-i-for-you-seed.js` and the matching assertion in `am-i-for-you.test.mjs`. The avatar initial and the greeting are both derived from this one value, so no other code needed touching. Left `docs/am-i-for-you-prototype.html` (the input UX-spec reference, not output code) alone. Verified live: panel greeting reads "Hi Dixit, welcome back", avatar shows "D". `npm run test:aify`: 8/8. `shopify theme check`: unchanged.

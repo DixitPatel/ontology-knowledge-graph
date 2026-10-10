@@ -54,7 +54,7 @@ export const PROFILE = {
 /* Extensions the 1.1 schema lacks (display name, order history). Kept
  * separate so the CDP schema itself stays untouched. */
 export const EXT = {
-  display_name: "Maya",
+  display_name: "Dixit",
   purchases: [
     { order_id: "FH-1042", date: "2026-09-01", sku: "SK-MST-045", qty: 1, status: "delivered" },
     { order_id: "FH-1042", date: "2026-09-01", sku: "SK-AZA-010", qty: 1, status: "delivered" },

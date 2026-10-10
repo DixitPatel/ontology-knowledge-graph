@@ -15,7 +15,7 @@ test("buildViewModel shapes the CDP profile into what the panel renders", () => 
   const ctx = getContext("customer_003", "glow-barrier-duo");
   const vm = buildViewModel(ctx.profile, ctx.ext, ctx.catalog, ctx.page);
 
-  assert.equal(vm.name, "Maya");
+  assert.equal(vm.name, "Dixit");
   assert.equal(vm.skin.fields.find((f) => f.k === "Type").v, "dry");
   assert.equal(vm.skin.concerns[0].label, "rosacea");
   assert.equal(vm.constraints.avoid.length, 4);
