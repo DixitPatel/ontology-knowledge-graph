@@ -9,5 +9,6 @@
 
 import { SkinSection } from "./am-i-for-you-section-skin.js";
 import { ConstraintsSection } from "./am-i-for-you-section-constraints.js";
+import { PurchasesSection } from "./am-i-for-you-section-purchases.js";
 
-export const SECTIONS = [SkinSection, ConstraintsSection];
+export const SECTIONS = [SkinSection, ConstraintsSection, PurchasesSection];
