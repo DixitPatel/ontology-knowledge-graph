@@ -11,6 +11,7 @@ import { getContext, buildViewModel } from "./am-i-for-you-view-model.js";
 import { SECTIONS } from "./am-i-for-you-sections.js";
 import { createPanel } from "./am-i-for-you-panel.js";
 import { configure } from "./am-i-for-you-events.js";
+import { configureCdp } from "./am-i-for-you-cdp.js";
 import { t } from "./am-i-for-you-copy.js";
 
 // Single seed shopper for the hackathon MVP -- see docs/progress.md for
@@ -23,6 +24,7 @@ function init() {
 
   const pageHandle = window.ONESELF_PRODUCT_HANDLE;
   configure(CUSTOMER_ID, pageHandle);
+  configureCdp(CUSTOMER_ID, pageHandle, window.ONESELF_CDP_PROXY_URL);
 
   const ctx = getContext(CUSTOMER_ID, pageHandle);
   const vm = buildViewModel(ctx.profile, ctx.ext, ctx.catalog, ctx.page);

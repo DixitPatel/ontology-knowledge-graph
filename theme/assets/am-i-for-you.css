@@ -440,3 +440,41 @@
     width: 100%;
   }
 }
+
+/* CDP debug panel -- temporary, see am-i-for-you-cdp.js. Shows the
+   Snowflake agent's raw verdict/reasons/next_question/conflicts for the
+   hackathon demo; not part of the designed panel UI. */
+.aify-cdp-debug {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 10000;
+  width: 280px;
+  max-height: 50vh;
+  overflow: auto;
+  background: var(--aify-surface);
+  border: 1px solid var(--aify-line);
+  border-radius: var(--aify-radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  font: 12px/1.4 var(--aify-mono);
+  color: var(--aify-ink);
+}
+.aify-cdp-debug__head {
+  padding: 8px 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 1px solid var(--aify-line);
+  background: var(--aify-brand-soft);
+  color: var(--aify-brand);
+}
+.aify-cdp-debug__body {
+  padding: 10px 12px;
+  color: var(--aify-muted);
+}
+.aify-cdp-debug__body ul {
+  margin: 4px 0;
+  padding-left: 16px;
+}
+.aify-cdp-debug--collapsed .aify-cdp-debug__body {
+  display: none;
+}
