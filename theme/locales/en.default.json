@@ -267,6 +267,15 @@
     }
   },
   "sections": {
+    "am_i_for_you": {
+      "name": "Am I for you?",
+      "heading": "Am I for you?",
+      "skin_type": "Suitable skin types",
+      "concerns": "Addresses",
+      "active_ingredients": "Active ingredients",
+      "not_verified": "We don't have verified information to confirm this.",
+      "strength_not_verified": "strength not verified, patch test before first use."
+    },
     "announcements": {
       "previous_announcement": "Previous announcement",
       "next_announcement": "Next announcement",
@@ -286,6 +295,8 @@
     "cart": {
       "title": "Your cart",
       "caption": "Cart items",
+      "bundle_badge": "Bundle · 2-step routine",
+      "single_badge": "Single product",
       "remove_title": "Remove {{ title }}",
       "estimated_total": "Estimated total",
       "new_estimated_total": "New estimated total",

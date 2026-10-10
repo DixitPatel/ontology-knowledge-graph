@@ -1,0 +1,148 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "vendor": {
+          "type": "text",
+          "settings": {
+            "text": "{{ product.vendor }}",
+            "text_style": "uppercase"
+          }
+        },
+        "title": {
+          "type": "title"
+        },
+        "price": {
+          "type": "price"
+        },
+        "variant_picker": {
+          "type": "variant_picker",
+          "settings": {
+            "picker_type": "button",
+            "swatch_shape": "circle"
+          }
+        },
+        "quantity_selector": {
+          "type": "quantity_selector"
+        },
+        "buy_buttons": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_dynamic_checkout": true,
+            "show_gift_card_recipient": true
+          }
+        },
+        "description": {
+          "type": "description"
+        },
+        "what_i_do": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "What I Do",
+            "icon": "none",
+            "content": "<p>A 2-step routine: Smooth Operator AHA Serum to treat, then Cloud Whip Barrier Restore Moisturiser to lock in hydration.</p>"
+          }
+        },
+        "whats_inside": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "What's Inside",
+            "icon": "none",
+            "content": "<p>1x Smooth Operator AHA Serum (30 ml) + 1x Cloud Whip Barrier Restore Moisturiser (150 ml).</p>"
+          }
+        },
+        "how_to_use": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "How to Use Me",
+            "icon": "none",
+            "content": "<p>Step 1: apply the serum to clean, dry skin. Step 2: follow with the moisturiser. Use morning and night.</p>"
+          }
+        },
+        "what_to_expect": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "What to Expect",
+            "icon": "none",
+            "content": "<p>Expected results timeline: not verified yet.</p>"
+          }
+        },
+        "reviews": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "Reviews",
+            "icon": "none",
+            "content": "<p>No reviews yet.</p>"
+          }
+        },
+        "share": {
+          "type": "share",
+          "settings": {
+            "share_label": "Share"
+          }
+        }
+      },
+      "block_order": [
+        "vendor",
+        "title",
+        "price",
+        "variant_picker",
+        "quantity_selector",
+        "buy_buttons",
+        "description",
+        "what_i_do",
+        "whats_inside",
+        "how_to_use",
+        "what_to_expect",
+        "reviews",
+        "share"
+      ],
+      "settings": {
+        "enable_sticky_info": true,
+        "color_scheme": "scheme-1",
+        "media_position": "left",
+        "gallery_layout": "stacked",
+        "media_size": "large",
+        "constrain_to_viewport": true,
+        "media_fit": "contain",
+        "image_zoom": "lightbox",
+        "mobile_thumbnails": "hide",
+        "hide_variants": true,
+        "enable_video_looping": false,
+        "padding_top": 36,
+        "padding_bottom": 12
+      }
+    },
+    "am_i_for_you": {
+      "type": "am-i-for-you",
+      "settings": {
+        "padding_top": 0,
+        "padding_bottom": 12
+      }
+    },
+    "related-products": {
+      "type": "related-products",
+      "settings": {
+        "heading": "You may also like",
+        "heading_size": "h2",
+        "products_to_show": 4,
+        "columns_desktop": 4,
+        "color_scheme": "scheme-1",
+        "image_ratio": "square",
+        "image_shape": "default",
+        "show_secondary_image": true,
+        "show_vendor": false,
+        "show_rating": false,
+        "columns_mobile": "2",
+        "padding_top": 36,
+        "padding_bottom": 28
+      }
+    }
+  },
+  "order": [
+    "main",
+    "am_i_for_you",
+    "related-products"
+  ]
+}

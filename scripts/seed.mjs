@@ -142,6 +142,7 @@ function seedProduct(row, shopAllCollectionId) {
     productType: row["Type"],
     tags,
     status: "ACTIVE",
+    templateSuffix: row["Template Suffix"] || null,
     collections: [shopAllCollectionId],
     productOptions: [
       { name: row["Option1 Name"], values: [{ name: row["Option1 Value"] }] },
@@ -185,6 +186,9 @@ function main() {
   const rows = loadProducts();
   const shopAllCollectionId = findOrCreateShopAllCollection();
   const onlineStorePublicationId = findOnlineStorePublicationId();
+
+  publishProduct(shopAllCollectionId, onlineStorePublicationId);
+  console.log("Published Shop All collection to Online Store");
 
   for (const row of rows) {
     const product = seedProduct(row, shopAllCollectionId);
