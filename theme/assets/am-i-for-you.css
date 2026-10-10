@@ -58,6 +58,10 @@
 
 .aify-trigger-row {
   margin-top: 0.8rem;
+  /* Reserves the trigger's rendered height so mounting it after the
+     module script loads doesn't shift the page (handoff 7's "no layout
+     shift on the host page"). */
+  min-height: 37px;
 }
 
 /* ---------- panel shell ---------- */
