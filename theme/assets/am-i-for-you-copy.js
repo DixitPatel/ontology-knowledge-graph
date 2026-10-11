@@ -7,7 +7,7 @@
  */
 
 const COPY = {
-  "trigger.label": "Am I for you?",
+  "trigger.label": "Who is this product for?",
   "head.greeting": (name) => `Hi ${name}, welcome back`,
   "head.sub": "Here is what we know about your skin.",
   "loading.message": "Loading your personal skincare knowledge graph...",
