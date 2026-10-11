@@ -62,6 +62,42 @@ async def answer(req: Request):
         r = await c.post(SQL_URL, headers=h, json=stmt)
     return r.json()
 
+PROFILE_SQL = """
+SELECT e.EDGE_TYPE, e.DST_ID, n.NODE_TYPE, n.NAME, e.PROPS, n.PROPS, e.CONFIDENCE
+FROM SKINCARE_KG.KG.KG_EDGE e JOIN SKINCARE_KG.KG.KG_NODE n ON n.NODE_ID = e.DST_ID
+WHERE e.SRC_ID = ? AND e.STATUS IN ('ASSERTED', 'ACCEPTED')
+UNION ALL
+SELECT 'SELF', NODE_ID, NODE_TYPE, NAME, NULL, PROPS, NULL
+FROM SKINCARE_KG.KG.KG_NODE WHERE NODE_ID = ?
+"""
+
+def _json(v):
+    return json.loads(v) if v else None
+
+@app.get("/profile/{shopper_id}")
+async def profile(shopper_id: str):
+    """Read path for the panel: one SQL read over KG_EDGE/KG_NODE, no LLM."""
+    stmt = {"statement": PROFILE_SQL,
+            "bindings": {"1": {"type": "TEXT", "value": shopper_id},
+                         "2": {"type": "TEXT", "value": shopper_id}},
+            "warehouse": "KG_WH", "role": "KG_DEV"}
+    h = headers() | {"Accept": "application/json"}
+    t0 = time.time()
+    async with httpx.AsyncClient(timeout=30) as c:
+        r = await c.post(SQL_URL, headers=h, json=stmt)
+    data = r.json().get("data") or []
+    edges, shopper = [], None
+    for et, dst, ntype, name, eprops, nprops, conf in data:
+        row = {"edge": et, "id": dst, "type": ntype, "name": name,
+               "props": _json(eprops) or {}, "node_props": _json(nprops) or {},
+               "confidence": float(conf) if conf is not None else None}
+        if et == "SELF":
+            shopper = row
+        else:
+            edges.append(row)
+    return {"shopper_id": shopper_id, "shopper": shopper, "edges": edges,
+            "ms": int((time.time() - t0) * 1000)}
+
 @app.get("/health")
 def health():
     return {"ok": True, "agent": AGENT_URL}

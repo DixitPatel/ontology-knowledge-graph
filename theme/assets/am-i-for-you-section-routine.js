@@ -90,7 +90,7 @@ export const RoutineSection = {
           </svg>
         </div>
         <div class="aify-dag-detail" aria-live="polite">${t("rt.hint")}</div>
-        <div class="aify-prov">observed ${vm.routine.observed_at}</div>
+        <div class="aify-prov">observed ${vm.routine.observed_at}${vm.source === "kg" ? " · from Snowflake KG" : ""}</div>
       </div>`;
   },
   mount: (el, vm) => {

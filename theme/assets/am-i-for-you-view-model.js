@@ -22,6 +22,80 @@ export function getContext(customerId, pageHandle) {
   };
 }
 
+/* Live path: Skin & Routine come from the Snowflake KG via the proxy's
+ * GET /profile/{shopper} (docs/Snowflake_agent_proxy.py). Anything the KG
+ * lacks (avoid list, purchases, candidate slot) stays on the seed. If the
+ * proxy is down or slow, the panel uses the seed unchanged. */
+const DEFAULT_PROXY_URL = "http://127.0.0.1:8788";
+const PROFILE_TIMEOUT_MS = 4000;
+
+const slug = (id) => id.split(":").pop().toLowerCase();
+
+// PURE: proxy JSON + seed profile -> {profile, catalog} in the seed's
+// CDP 1.1 shape, so buildViewModel() needs no change.
+export function profileFromKg(kg, seedProfile, seedCatalog) {
+  const profile = structuredClone(seedProfile);
+  const catalog = { ...seedCatalog };
+  const bp = profile.beauty_profile;
+  const edges = kg.edges || [];
+  const fact = (e) => ({ value: e.name.toLowerCase(), source: e.props.source, observed_at: e.props.observed_at, confidence: e.confidence });
+
+  for (const e of edges.filter((x) => x.edge === "HAS")) {
+    if (e.props.field === "type") bp.skin.type = fact(e);
+    if (e.props.field === "sensitivity") bp.skin.sensitivity = fact(e);
+    if (e.props.field === "fitzpatrick") bp.skin.fitzpatrick_type = { ...fact(e), value: e.name };
+  }
+  const sp = kg.shopper?.node_props || {};
+  if (sp.age_band) bp.skin.age_band = sp.age_band;
+  if (sp.climate) bp.skin.climate = sp.climate;
+
+  const concerns = edges
+    .filter((e) => e.edge === "HAS" && e.type === "CONCERN")
+    .map((e) => ({ id: e.name.toLowerCase().replace(/ /g, "_"), rank: e.props.rank || "secondary", severity: e.props.severity || "stated", source: e.props.source || "session" }))
+    .sort((a, b) => (a.rank === "primary" ? -1 : 0) - (b.rank === "primary" ? -1 : 0));
+  if (concerns.length) bp.concerns = concerns;
+
+  const goals = edges
+    .filter((e) => e.edge === "WANTS")
+    .sort((a, b) => (a.props.order ?? 0) - (b.props.order ?? 0))
+    .map((e) => ({ id: slug(e.id) }));
+  if (goals.length) bp.goals = goals;
+
+  const steps = edges.filter((e) => e.edge === "ROUTINE_STEP");
+  if (steps.length) {
+    for (const e of steps) {
+      const sku = e.node_props.sku || e.id;
+      catalog[sku] = { name: e.name, price: e.node_props.price };
+    }
+    const lane = (l) =>
+      steps
+        .filter((e) => e.props.lane === l)
+        .sort((a, b) => a.props.step - b.props.step)
+        .map((e) => ({ step: e.props.step, product_type: e.props.product_type, key_ingredient: e.props.key_ingredient ?? null, sku: e.node_props.sku || e.id }));
+    bp.routine = { observed_at: sp.routine_observed_at || bp.routine.observed_at, am: lane("am"), pm: lane("pm") };
+  }
+
+  return { profile, catalog };
+}
+
+export async function getLiveContext(customerId, pageHandle, proxyUrl = DEFAULT_PROXY_URL) {
+  const ctx = getContext(customerId, pageHandle);
+  try {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), PROFILE_TIMEOUT_MS);
+    const res = await fetch(`${proxyUrl}/profile/${encodeURIComponent(`SHP:${customerId}`)}`, { signal: ctl.signal });
+    clearTimeout(timer);
+    const kg = await res.json();
+    if (!kg.edges?.length) throw new Error("shopper not in KG");
+    const { profile, catalog } = profileFromKg(kg, ctx.profile, ctx.catalog);
+    console.log(`[aify] profile from Snowflake KG: ${kg.edges.length} edges, ${kg.ms}ms`);
+    return { ...ctx, profile, catalog, source: "kg" };
+  } catch (err) {
+    console.warn("[aify] KG profile unavailable, using seed:", err.message);
+    return { ...ctx, source: "seed" };
+  }
+}
+
 const human = (s) => (s ? s.replace(/_/g, " ") : "");
 
 export function buildViewModel(profile, ext, catalog, page) {

@@ -7,7 +7,7 @@
  * is already set by theme.liquid by the time this runs.
  */
 
-import { getContext, buildViewModel } from "./am-i-for-you-view-model.js";
+import { getLiveContext, buildViewModel } from "./am-i-for-you-view-model.js";
 import { SECTIONS } from "./am-i-for-you-sections.js";
 import { createPanel } from "./am-i-for-you-panel.js";
 import { configure } from "./am-i-for-you-events.js";
@@ -18,7 +18,7 @@ import { t } from "./am-i-for-you-copy.js";
 // why (no demo-controls bar/shopper-switcher exists in this repo).
 const CUSTOMER_ID = "customer_003";
 
-function init() {
+async function init() {
   const mount = document.querySelector('[data-cf-slot="trigger-mount"]');
   if (!mount) return;
 
@@ -26,8 +26,10 @@ function init() {
   configure(CUSTOMER_ID, pageHandle);
   configureCdp(CUSTOMER_ID, pageHandle, window.ONESELF_CDP_PROXY_URL);
 
-  const ctx = getContext(CUSTOMER_ID, pageHandle);
+  // Skin & Routine read from the Snowflake KG; falls back to the seed.
+  const ctx = await getLiveContext(CUSTOMER_ID, pageHandle, window.ONESELF_CDP_PROXY_URL);
   const vm = buildViewModel(ctx.profile, ctx.ext, ctx.catalog, ctx.page);
+  vm.source = ctx.source;
   const panel = createPanel({ sections: SECTIONS, vm });
 
   const btn = document.createElement("button");
