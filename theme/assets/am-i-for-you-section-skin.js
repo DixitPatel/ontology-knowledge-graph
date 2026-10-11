@@ -37,6 +37,15 @@ export const SkinSection = {
       <div class="aify-chips">${vm.constraints.avoid
         .map((a) => `<span class="aify-chip aify-avoid">${a.label}<small>${a.reason}</small></span>`)
         .join("")}</div>
+    </div>
+    <div class="aify-card" style="animation-delay:180ms" data-cf-slot="skin.reactions">
+      <h3>${t("con.reactions")}</h3>
+      ${vm.constraints.reactions
+        .map(
+          (r) => `
+        <div class="aify-row"><div>${r.label} — ${r.effect}<div class="aify-sub">${r.product} · ${r.date}</div></div><span class="aify-tag aify-ret">reaction</span></div>`
+        )
+        .join("")}
     </div>`,
   mount: (el) => {
     el.querySelectorAll("[data-ans]").forEach((b) => {

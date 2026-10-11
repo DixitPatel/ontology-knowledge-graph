@@ -13,7 +13,7 @@ const COPY = {
   "loading.message": "Loading your personal skincare knowledge graph...",
   "tab.skin": "Skin",
   "tab.skin_routine": "Skin & Routine",
-  "tab.constraints": "Reactions & Budget",
+  "tab.constraints": "Skin Care Budget",
   "tab.purchases": "Purchases",
   "tab.routine": "Routine",
   "skin.title": "Skin profile",
