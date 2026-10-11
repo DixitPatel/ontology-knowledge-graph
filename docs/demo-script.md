@@ -44,7 +44,7 @@ A shopper is comparing the single serum against the bundle before buying.
    itself a signal (`oneself:product_hop`).
 2. Add the moisturiser to the cart a couple of times while weighing it
    against the bundle — cart churn is a `value_check` signal.
-3. Visit **Glow Barrier Duo**. The intent prompt appears:
+3. Visit **Glow Barrier**. The intent prompt appears:
    **"What would help you decide?"** (the `value_check` hypothesis, driven
    by the duo↔single hopping).
 4. Answer **"Bundle savings"**.

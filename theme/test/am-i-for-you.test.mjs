@@ -22,7 +22,7 @@ test("buildViewModel shapes the CDP profile into what the panel renders", () => 
   assert.equal(vm.constraints.reactions[0].product, "Mist Hazel Toner");
   assert.equal(vm.purchases[0].name, "Still Water Barrier Cream");
   assert.equal(vm.routine.lanes.length, 2);
-  assert.deepEqual(vm.routine.ghost, { lane: "pm", before_step: 2, name: "Glow Barrier Duo" });
+  assert.deepEqual(vm.routine.ghost, { lane: "pm", before_step: 2, name: "Glow Barrier" });
 });
 
 test("buildViewModel has no ghost node when the page has no candidate slot", () => {
@@ -90,4 +90,37 @@ test("RoutineSection.minWidth matches layoutRoutine's width plus the panel's sid
   const vm = buildViewModel(ctx.profile, ctx.ext, ctx.catalog, ctx.page);
   const layout = layoutRoutine(vm.routine);
   assert.equal(RoutineSection.minWidth(vm), layout.W + 80);
+});
+
+test("profileFromKg: KG rows mirroring the seed give the same view model", async () => {
+  const { profileFromKg } = await import("../assets/am-i-for-you-view-model.js");
+  const ctx = getContext("customer_003", "glow-barrier-duo");
+  const has = (id, type, name, conf, props) => ({ edge: "HAS", id, type, name, confidence: conf, props, node_props: {} });
+  const step = (sku, name, lane, n, product_type, key_ingredient) => ({
+    edge: "ROUTINE_STEP", id: `PRD:ext:${sku}`, type: "PRODUCT", name, confidence: 1,
+    props: { lane, step: n, product_type, key_ingredient }, node_props: { sku },
+  });
+  const kg = {
+    shopper: { node_props: { age_band: "35-44", climate: "coastal_mild", routine_observed_at: "2026-09-01" } },
+    edges: [
+      has("SKT:dry", "SKIN_TYPE", "Dry", 0.7, { field: "type", source: "self_reported_quiz", observed_at: "2026-03-02" }),
+      has("SKT:sensitive", "SKIN_TYPE", "Sensitive", 0.9, { field: "sensitivity", source: "self_reported_quiz", observed_at: "2026-03-02" }),
+      has("FTZ:I", "SKIN_TONE", "I", 0.95, { field: "fitzpatrick", source: "in_store_scan", observed_at: "2026-04-15" }),
+      has("CON:redness", "CONCERN", "Redness", 1, { field: "concern", rank: "secondary", severity: "moderate", source: "self_reported_quiz" }),
+      has("CON:rosacea", "CONCERN", "Rosacea", 1, { field: "concern", rank: "primary", severity: "moderate", source: "self_reported_quiz" }),
+      has("CON:dry", "CONCERN", "Dryness", 1, { field: "concern", rank: "secondary", severity: "mild", source: "advisor_note" }),
+      { edge: "WANTS", id: "GOAL:simple_routine", type: "GOAL", name: "Simple routine", props: { order: 2 }, node_props: {} },
+      { edge: "WANTS", id: "GOAL:calm_redness", type: "GOAL", name: "Calm redness", props: { order: 1 }, node_props: {} },
+      step("SK-SPF-330", "Shoreline Mineral SPF 30", "am", 3, "sunscreen", "zinc_oxide"),
+      step("SK-CLN-201", "Daily Kit Gel Cleanser", "am", 1, "cleanser", null),
+      step("SK-AZA-010", "Quiet Tone Azelaic 10%", "am", 2, "treatment", "azelaic_acid"),
+      step("SK-CLN-201", "Daily Kit Gel Cleanser", "pm", 1, "cleanser", null),
+      step("SK-MST-045", "Still Water Barrier Cream", "pm", 2, "moisturizer", "ceramides"),
+    ],
+  };
+  const live = profileFromKg(kg, ctx.profile, ctx.catalog);
+  const vmSeed = buildViewModel(ctx.profile, ctx.ext, ctx.catalog, ctx.page);
+  const vmKg = buildViewModel(live.profile, ctx.ext, live.catalog, ctx.page);
+  assert.deepEqual(vmKg.skin, vmSeed.skin);
+  assert.deepEqual(vmKg.routine, vmSeed.routine);
 });

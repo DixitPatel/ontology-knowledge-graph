@@ -77,7 +77,7 @@ export const CATALOG = {
   "SK-TONER-112": { name: "Mist Hazel Toner", price: 22 },
   "smooth-operator-aha-serum": { name: "Smooth Operator AHA Serum", price: 24 },
   "cloud-whip-moisturiser": { name: "Cloud Whip Barrier Restore Moisturiser", price: 28 },
-  "glow-barrier-duo": { name: "Glow Barrier Duo", price: 45 },
+  "glow-barrier-duo": { name: "Glow Barrier", price: 45 },
 };
 
 /* handle -> {sku, candidate_slot}. Later: the decision engine supplies
