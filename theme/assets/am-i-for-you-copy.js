@@ -34,6 +34,16 @@ const COPY = {
   "rt.title": "Your routine",
   "rt.hint": "Tap a step for details.",
   "rt.ghost": "This product?",
+  "fit.title": "Is this right for you?",
+  "fit.loading": "Checking this product against your skin graph…",
+  "fit.error": "We couldn't check this right now.",
+  "fit.retry": "Retry",
+  "fit.try": "If you try it",
+  "fit.sources": "Sources",
+  "fit.verdict.good_fit": "Good fit",
+  "fit.verdict.caution": "Use with caution",
+  "fit.verdict.not_for_you": "Not for you",
+  "fit.verdict.need_more_info": "Need more info",
 };
 
 export const t = (k, ...a) => {

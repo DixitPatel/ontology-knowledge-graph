@@ -10,8 +10,9 @@
 import { getLiveContext, buildViewModel } from "./am-i-for-you-view-model.js";
 import { SECTIONS } from "./am-i-for-you-sections.js";
 import { createPanel } from "./am-i-for-you-panel.js";
-import { configure } from "./am-i-for-you-events.js";
+import { configure, emit } from "./am-i-for-you-events.js";
 import { configureCdp } from "./am-i-for-you-cdp.js";
+import { renderFit, fetchFit } from "./am-i-for-you-section-fit.js";
 import { t } from "./am-i-for-you-copy.js";
 
 // Single seed shopper for the hackathon MVP -- see docs/progress.md for
@@ -23,21 +24,45 @@ async function init() {
   if (!mount) return;
 
   const pageHandle = window.ONESELF_PRODUCT_HANDLE;
+  const proxyUrl = window.ONESELF_CDP_PROXY_URL;
   configure(CUSTOMER_ID, pageHandle);
   let panel = null;
-  // After the agent writes to the KG, re-read /profile and redraw.
-  configureCdp(CUSTOMER_ID, pageHandle, window.ONESELF_CDP_PROXY_URL, async () => {
-    const next = await getLiveContext(CUSTOMER_ID, pageHandle, window.ONESELF_CDP_PROXY_URL);
+
+  // FIT_AGENT's "Is this right for you?" card. Starts at init, not on
+  // panel open, and never awaited -- the trigger button/panel are ready
+  // as soon as the profile loads, independent of how long this takes.
+  const runFit = async (vm) => {
+    if (!panel || !pageHandle) return;
+    panel.fitEl.innerHTML = renderFit("loading", null);
+    const answer = await fetchFit(proxyUrl, {
+      shopper_id: `SHP:${CUSTOMER_ID}`,
+      product_handle: pageHandle,
+      panel_context: { skin: vm.skin, constraints: vm.constraints, routine: vm.routine },
+    });
+    panel.fitEl.innerHTML = renderFit(answer ? "ready" : "error", answer);
+    if (answer) {
+      emit("fit_shown", { verdict: answer.verdict });
+    } else {
+      panel.fitEl.querySelector(".aify-fit-retry").onclick = () => runFit(vm);
+    }
+  };
+
+  // After the agent writes to the KG, re-read /profile, redraw, and
+  // re-check the fit answer against the shopper's updated graph.
+  configureCdp(CUSTOMER_ID, pageHandle, proxyUrl, async () => {
+    const next = await getLiveContext(CUSTOMER_ID, pageHandle, proxyUrl);
     const nextVm = buildViewModel(next.profile, next.ext, next.catalog, next.page);
     nextVm.source = next.source;
     panel?.update(nextVm);
+    runFit(nextVm);
   });
 
   // Skin & Routine read from the Snowflake KG; falls back to the seed.
-  const ctx = await getLiveContext(CUSTOMER_ID, pageHandle, window.ONESELF_CDP_PROXY_URL);
+  const ctx = await getLiveContext(CUSTOMER_ID, pageHandle, proxyUrl);
   const vm = buildViewModel(ctx.profile, ctx.ext, ctx.catalog, ctx.page);
   vm.source = ctx.source;
   panel = createPanel({ sections: SECTIONS, vm });
+  runFit(vm);
 
   const btn = document.createElement("button");
   btn.type = "button";

@@ -27,6 +27,7 @@ export function createPanel({ sections, vm, initialTab = sections[0]?.id }) {
         <div><h2 id="aify-title">${t("head.greeting", vm.name)}</h2><p>${t("head.sub")}</p></div>
         <button class="aify-close" aria-label="Close">×</button>
       </header>
+      <div class="aify-fit" data-cf-slot="fit" aria-live="polite" hidden></div>
       <div class="aify-loading" aria-live="polite">
         <div class="aify-loading-bar" aria-hidden="true"><span style="animation-duration:${LOADING_MS}ms"></span></div>
         <p>${t("loading.message")}</p>
@@ -41,6 +42,7 @@ export function createPanel({ sections, vm, initialTab = sections[0]?.id }) {
   document.body.appendChild(root);
 
   const panelEl = root.querySelector(".aify-panel");
+  const fitEl = root.querySelector(".aify-fit");
   const loadingEl = root.querySelector(".aify-loading");
   const tabsEl = root.querySelector(".aify-tabs");
   const bodyEl = root.querySelector(".aify-body");
@@ -68,6 +70,7 @@ export function createPanel({ sections, vm, initialTab = sections[0]?.id }) {
 
   const reveal = () => {
     loadingEl.hidden = true;
+    fitEl.hidden = false;
     tabsEl.hidden = false;
     bodyEl.hidden = false;
     if (initialTab) select(initialTab);
@@ -83,6 +86,7 @@ export function createPanel({ sections, vm, initialTab = sections[0]?.id }) {
     // <span> (toggling a class wouldn't restart a running animation).
     clearTimeout(loadingTimer);
     loadingEl.hidden = false;
+    fitEl.hidden = true;
     tabsEl.hidden = true;
     bodyEl.hidden = true;
     const bar = loadingEl.querySelector(".aify-loading-bar");
@@ -118,5 +122,5 @@ export function createPanel({ sections, vm, initialTab = sections[0]?.id }) {
     if (active && !bodyEl.hidden) select(active);
   };
 
-  return { open, close, update };
+  return { open, close, update, fitEl };
 }

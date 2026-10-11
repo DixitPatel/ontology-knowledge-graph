@@ -425,7 +425,8 @@
   .aify-trigger .dot,
   .aify-card,
   .aify-dag .aify-edge,
-  .aify-loading-bar span {
+  .aify-loading-bar span,
+  .aify-fit-shimmer::after {
     animation: none !important;
     transition: none !important;
   }
@@ -486,3 +487,91 @@
 .aify-change button { padding: 8px 16px; border: 1px solid var(--aify-brand); border-radius: 999px; background: var(--aify-brand); color: #fff; font: inherit; cursor: pointer; }
 .aify-change button:disabled { opacity: 0.5; cursor: progress; }
 .aify-change-status { flex-basis: 100%; font-size: 13px; color: var(--aify-muted); min-height: 1em; }
+
+/* "Is this right for you?" fit card -- above the tabs, shown on every tab. */
+.aify-fit {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--aify-line);
+  background: var(--aify-surface);
+}
+.aify-fit[hidden] {
+  display: none;
+}
+.aify-fit h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+.aify-fit-shimmer {
+  position: relative;
+  margin: 0;
+  color: var(--aify-muted);
+  font-size: 13px;
+  overflow: hidden;
+}
+.aify-fit-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  animation: aify-shimmer 1.6s ease-in-out infinite;
+}
+@keyframes aify-shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+.aify-fit-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--aify-bg);
+  color: var(--aify-muted);
+  border: 1px solid var(--aify-line);
+}
+.aify-fit-pill--good {
+  background: var(--aify-brand-soft);
+  color: var(--aify-brand);
+  border-color: var(--aify-brand);
+}
+.aify-fit-pill--warn {
+  background: var(--aify-warn-soft);
+  color: var(--aify-warn);
+  border-color: #e7c9bc;
+}
+.aify-fit-headline {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--aify-ink);
+}
+.aify-fit-reasons,
+.aify-fit-try ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: var(--aify-muted);
+}
+.aify-fit-try {
+  margin-top: 8px;
+  font-size: 13px;
+}
+.aify-fit-sources {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--aify-muted);
+}
+.aify-fit-retry {
+  margin-top: 8px;
+  padding: 6px 14px;
+  border: 1px solid var(--aify-brand);
+  border-radius: 999px;
+  background: var(--aify-brand);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
