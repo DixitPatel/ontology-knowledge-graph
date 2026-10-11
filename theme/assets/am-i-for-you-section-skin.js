@@ -31,6 +31,12 @@ export const SkinSection = {
         .join("")}</div>
       <h3 style="margin-top:14px">${t("skin.goals")}</h3>
       <div class="aify-chips">${vm.skin.goals.map((g) => `<span class="aify-chip">${g}</span>`).join("")}</div>
+    </div>
+    <div class="aify-card" style="animation-delay:120ms" data-cf-slot="skin.avoid">
+      <h3>${t("con.avoid")}</h3>
+      <div class="aify-chips">${vm.constraints.avoid
+        .map((a) => `<span class="aify-chip aify-avoid">${a.label}<small>${a.reason}</small></span>`)
+        .join("")}</div>
     </div>`,
   mount: (el) => {
     el.querySelectorAll("[data-ans]").forEach((b) => {
