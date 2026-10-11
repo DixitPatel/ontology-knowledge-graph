@@ -70,13 +70,30 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE PROCEDURE TOOL_RANK_PRODUCTS(SHOPPER STRING)
+-- With the full Sephora catalog loaded (~1,264 products), returning every
+-- row blows past what's useful to hand the LLM (~1.2MB). Scoped to the
+-- product the event is about plus the top 10 unblocked, per
+-- docs/Snowflake_RDF_LOAD_HANDOFF.md Task 5.
+CREATE OR REPLACE PROCEDURE TOOL_RANK_PRODUCTS(SHOPPER STRING, PRODUCT STRING)
 RETURNS VARIANT LANGUAGE SQL AS
 $$
 DECLARE r VARIANT;
 BEGIN
   SELECT ARRAY_AGG(OBJECT_CONSTRUCT(*)) WITHIN GROUP (ORDER BY BLOCKED, FIT DESC) INTO :r
-  FROM TABLE(RANK_PRODUCTS(:SHOPPER));
+  FROM (
+    SELECT PRODUCT_ID, NAME, FIT, BLOCKED, REASONS
+    FROM TABLE(RANK_PRODUCTS(:SHOPPER))
+    WHERE PRODUCT_ID = :PRODUCT
+    UNION
+    SELECT PRODUCT_ID, NAME, FIT, BLOCKED, REASONS
+    FROM (
+      SELECT PRODUCT_ID, NAME, FIT, BLOCKED, REASONS
+      FROM TABLE(RANK_PRODUCTS(:SHOPPER))
+      WHERE NOT BLOCKED
+      ORDER BY FIT DESC
+      LIMIT 10
+    )
+  );
   RETURN r;
 END;
 $$;
@@ -139,8 +156,9 @@ instructions:
     4) CLICK or DWELL on an ingredient or concern: call upsert_fact with edge INTERESTED_IN,
        origin INFERRED, confidence 0.3 for a click and 0.5 for dwell over 10 seconds.
        Never infer HAS or CONDITION facts from behavior.
-    5) Then call rank_products and next_question. If the product is in the ranked list,
-       call routine_conflicts for it.
+    5) Then call rank_products with the event's product id (it returns that product's row
+       plus the top 10 unblocked, not the whole catalog) and call next_question. If the
+       product is in the ranked list, call routine_conflicts for it.
   response: >
     Return only JSON:
     {"verdict": "good_fit|caution|not_for_you|need_more_info",
@@ -196,11 +214,13 @@ tools:
   - tool_spec:
       type: generic
       name: rank_products
-      description: Fit score, blocked flag, and reasons for every product.
+      description: Fit score, blocked flag, and reasons for the event's product, plus the top 10 unblocked products for context.
       input_schema:
         type: object
-        properties: {shopper: {type: string}}
-        required: [shopper]
+        properties:
+          shopper: {type: string}
+          product: {type: string}
+        required: [shopper, product]
   - tool_spec:
       type: generic
       name: next_question
@@ -250,7 +270,7 @@ SELECT * FROM EVENT_LOG ORDER BY TS DESC;
 -- ---------- 5. Smoke test (SQL path, no UI) ----------
 -- Check that tools work directly:
 CALL TOOL_UPSERT_FACT('SHP:demo2','USES','ING:glycolic','STATED',1.0);
-CALL TOOL_RANK_PRODUCTS('SHP:demo2');
+CALL TOOL_RANK_PRODUCTS('SHP:demo2', 'PRD:night');
 -- Then test the agent in Snowsight: AI & ML > Agents > CDP_AGENT, send:
 -- {"shopper_id":"SHP:demo2","product_id":"PRD:night","event_type":"FREE_TEXT",
 --  "payload":{"text":"I'm pregnant and I already use a glycolic toner"}}

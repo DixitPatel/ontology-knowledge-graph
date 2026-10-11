@@ -1,0 +1,68 @@
+@prefix kg:   <urn:skincare-kg:schema#> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# Every kg:PRODUCT has a name and at least one CONTAINS edge (as src).
+kg:ProductShape
+    a sh:NodeShape ;
+    sh:targetClass kg:PRODUCT ;
+    sh:property [
+        sh:path kg:name ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:sparql [
+        sh:message "kg:PRODUCT must be the src of >= 1 CONTAINS kg:Edge" ;
+        sh:select """
+            SELECT $this
+            WHERE {
+                FILTER NOT EXISTS {
+                    ?edge a kg:Edge ;
+                        kg:edgeType "CONTAINS" ;
+                        kg:src $this .
+                }
+            }
+        """ ;
+    ] .
+
+# Every CONTAINS edge's dst is one of the 7 curated ING: ids.
+kg:ContainsEdgeShape
+    a sh:NodeShape ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:select """
+            SELECT ?this
+            WHERE { ?this a kg:Edge ; kg:edgeType "CONTAINS" . }
+        """ ;
+    ] ;
+    sh:property [
+        sh:path kg:dst ;
+        sh:in (
+            <urn:skincare-kg:ING:hyaluronic>
+            <urn:skincare-kg:ING:vitc>
+            <urn:skincare-kg:ING:niacinamide>
+            <urn:skincare-kg:ING:salicylic>
+            <urn:skincare-kg:ING:glycolic>
+            <urn:skincare-kg:ING:retinol>
+            <urn:skincare-kg:ING:azelaic>
+        ) ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] .
+
+# Every kg:Edge has exactly one src, dst, edgeType, source.
+kg:EdgeShape
+    a sh:NodeShape ;
+    sh:targetClass kg:Edge ;
+    sh:property [
+        sh:path kg:src ; sh:minCount 1 ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path kg:dst ; sh:minCount 1 ; sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path kg:edgeType ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path kg:source ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+    ] .
