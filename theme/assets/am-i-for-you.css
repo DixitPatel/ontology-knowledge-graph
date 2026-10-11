@@ -211,6 +211,10 @@
 }
 .aify-body {
   flex: 1;
+  /* Flex items default to min-height:auto, which for an overflow:auto
+     box still equals its content's height -- without this, body refuses
+     to shrink and its own scrollbar never actually engages. */
+  min-height: 0;
   overflow-y: auto;
   padding: 4px 20px 24px;
 }
@@ -494,6 +498,11 @@
   margin-bottom: 8px;
   border-bottom: 1px solid var(--aify-line);
   background: var(--aify-surface);
+  /* A long verdict (many reasons/sources) must not be able to grow past
+     the panel and push the tabs/cards below it out of reach -- cap it
+     and let it scroll on its own instead. */
+  max-height: 38vh;
+  overflow-y: auto;
 }
 .aify-fit[hidden] {
   display: none;
