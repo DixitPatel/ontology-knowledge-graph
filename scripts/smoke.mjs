@@ -43,7 +43,7 @@ async function main() {
   await page.goto(`${BASE_URL}/products/smooth-operator-aha-serum`, {
     waitUntil: "load",
   });
-  await page.waitForSelector("text=Am I for you?");
+  await page.waitForSelector("text=Is this product right for you?");
 
   console.log("Adding product to cart");
   await page.click('button[name="add"]');

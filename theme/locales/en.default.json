@@ -268,8 +268,8 @@
   },
   "sections": {
     "am_i_for_you": {
-      "name": "Am I for you?",
-      "heading": "Am I for you?",
+      "name": "Is this product right for you?",
+      "heading": "Is this product right for you?",
       "skin_type": "Suitable skin types",
       "concerns": "Addresses",
       "active_ingredients": "Active ingredients",

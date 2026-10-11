@@ -16,7 +16,7 @@ async function runAhaWorryPath(browser) {
   await page.waitForSelector("text=Your daily skincare routine", { state: "attached" });
 
   await page.goto(`${THEME_URL}/products/smooth-operator-aha-serum`, { waitUntil: "load" });
-  await page.waitForSelector("text=Am I for you?", { state: "attached" });
+  await page.waitForSelector("text=Is this product right for you?", { state: "attached" });
 
   await page.locator('details[data-oneself-section="whats_inside"] summary').click();
   await page.waitForSelector("#oneself-intent-prompt:not([hidden])", { timeout: 10000 });
@@ -49,10 +49,10 @@ async function runWhichOneShouldIGetPath(browser) {
   const page = await context.newPage();
 
   await page.goto(`${THEME_URL}/products/smooth-operator-aha-serum`, { waitUntil: "load" });
-  await page.waitForSelector("text=Am I for you?", { state: "attached" });
+  await page.waitForSelector("text=Is this product right for you?", { state: "attached" });
 
   await page.goto(`${THEME_URL}/products/cloud-whip-moisturiser`, { waitUntil: "load" });
-  await page.waitForSelector("text=Am I for you?", { state: "attached" });
+  await page.waitForSelector("text=Is this product right for you?", { state: "attached" });
 
   // Cart churn: weighing the single moisturiser before deciding on the
   // bundle -- this is what tips the hypothesis to value_check rather than

@@ -11,9 +11,9 @@ async function main() {
 
   console.log("Visiting the AHA serum product page");
   await page.goto(`${THEME_URL}/products/smooth-operator-aha-serum`, { waitUntil: "load" });
-  await page.waitForSelector("text=Am I for you?", { state: "attached" });
+  await page.waitForSelector("text=Is this product right for you?", { state: "attached" });
 
-  console.log("Opening Am I For You");
+  console.log("Opening Is this product right for you");
   await page.locator('details[data-oneself-section="am_i_for_you"] summary').click();
 
   console.log("Waiting for the skin_type_fit prompt");

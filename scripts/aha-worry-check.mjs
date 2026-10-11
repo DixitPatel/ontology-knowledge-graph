@@ -16,7 +16,7 @@ async function main() {
 
   console.log("Visiting the AHA serum product page");
   await page.goto(`${THEME_URL}/products/smooth-operator-aha-serum`, { waitUntil: "load" });
-  await page.waitForSelector("text=Am I for you?", { state: "attached" });
+  await page.waitForSelector("text=Is this product right for you?", { state: "attached" });
 
   console.log("Worrying about irritation: opening What's Inside (AHA / patch-test info)");
   await page.locator('details[data-oneself-section="whats_inside"] summary').click();

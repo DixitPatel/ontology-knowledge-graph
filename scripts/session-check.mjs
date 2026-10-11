@@ -15,7 +15,7 @@ async function main() {
 
   console.log("Visiting product page: smooth-operator-aha-serum");
   await page.goto(`${THEME_URL}/products/smooth-operator-aha-serum`, { waitUntil: "load" });
-  await page.waitForSelector("text=Am I for you?", { state: "attached" });
+  await page.waitForSelector("text=Is this product right for you?", { state: "attached" });
 
   console.log("Opening the What's Inside collapsible section");
   await page.locator('details[data-oneself-section="whats_inside"] summary').click();
