@@ -1,7 +1,7 @@
 # Local proxy: tab -> this proxy -> Cortex Agent (key stays on the server).
 # pip install fastapi uvicorn httpx pyjwt cryptography
 # Run: SF_ACCOUNT=<org-account> SF_USER=<user> uvicorn agent_proxy:app --port 8787
-import base64, hashlib, json, os, time
+import base64, hashlib, json, os, re, time
 import httpx, jwt
 from cryptography.hazmat.primitives import serialization
 from fastapi import FastAPI, Request
@@ -13,7 +13,12 @@ USER = os.environ["SF_USER"].upper()
 KEY_PATH = os.path.expanduser(os.environ.get("SF_KEY", "~/.snowflake/keys/rsa_key.p8"))
 BASE = f"https://{ACCOUNT.lower()}.snowflakecomputing.com"
 AGENT_URL = f"{BASE}/api/v2/databases/SKINCARE_KG/schemas/KG/agents/CDP_AGENT:run"
+FIT_AGENT_URL = f"{BASE}/api/v2/databases/SKINCARE_KG/schemas/KG/agents/FIT_AGENT:run"
 SQL_URL = f"{BASE}/api/v2/statements"
+
+GUIDANCE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ontology", "guidance.json")
+with open(GUIDANCE_PATH) as f:
+    GUIDANCE = json.load(f)
 
 with open(KEY_PATH, "rb") as f:
     PRIVATE_KEY = serialization.load_pem_private_key(f.read(), password=None)
@@ -140,6 +145,73 @@ async def profile(shopper_id: str):
             edges.append(row)
     return {"shopper_id": shopper_id, "shopper": shopper, "edges": edges,
             "ms": int((time.time() - t0) * 1000)}
+
+def extract_json_reply(sse: str, key: str = "verdict"):
+    """Same approach as am-i-for-you-cdp.js's extractReply(): the agent's
+    reply JSON sits as an escaped string inside one SSE event's text
+    block, possibly fenced in ``` ```. Walk every data line's parsed
+    object for a string that itself parses as a dict containing `key`;
+    the last match wins.
+    """
+    found = None
+    for line in sse.splitlines():
+        if not line.startswith("data: "):
+            continue
+        try:
+            event = json.loads(line[6:])
+        except ValueError:
+            continue
+        stack = [event]
+        while stack:
+            cur = stack.pop()
+            if isinstance(cur, str):
+                s = re.sub(r"^```(?:json)?\s*|\s*```$", "", cur.strip())
+                if s.startswith("{") and f'"{key}"' in s:
+                    try:
+                        parsed = json.loads(s)
+                        if isinstance(parsed, dict) and key in parsed:
+                            found = parsed
+                    except ValueError:
+                        pass
+            elif isinstance(cur, list):
+                stack.extend(cur)
+            elif isinstance(cur, dict):
+                stack.extend(cur.values())
+    return found
+
+@app.post("/fit")
+async def fit(req: Request):
+    """Body: {shopper_id, product_handle, panel_context}. Not streamed --
+    buffers the FIT_AGENT reply, parses the final verdict JSON, and
+    returns {answer, ms} (or {answer: null, error, ms} on failure) with
+    HTTP 200 either way, so the UI can always show a fallback.
+    """
+    body = await req.json()
+    t0 = time.time()
+    try:
+        shopper_id = body["shopper_id"]
+        product_handle = body["product_handle"]
+        product_id = f"PRD:store:{product_handle}"
+        by_product = GUIDANCE.get("by_product", {}).get(product_handle, {})
+        used_sources = {e.get("source") for e in by_product.values() if isinstance(e, dict) and e.get("source")}
+        guidance = {"by_product": by_product,
+                    "sources": {k: v for k, v in GUIDANCE.get("sources", {}).items() if k in used_sources}} if by_product else {}
+        message = {"shopper_id": shopper_id, "product_id": product_id,
+                   "panel_context": body.get("panel_context", {}), "guidance": guidance}
+        agent_body = {"messages": [{"role": "user", "content": [{"type": "text", "text": json.dumps(message)}]}]}
+        async with httpx.AsyncClient(timeout=45) as c:
+            r = await c.post(FIT_AGENT_URL, headers=headers(), json=agent_body)
+        sse = r.text
+        log_agent_trace(sse, time.time() - t0)
+        answer = extract_json_reply(sse, "verdict")
+        ms = int((time.time() - t0) * 1000)
+        if answer is None:
+            return {"answer": None, "error": "no parsable reply", "ms": ms}
+        return {"answer": answer, "ms": ms}
+    except httpx.TimeoutException:
+        return {"answer": None, "error": "timeout", "ms": int((time.time() - t0) * 1000)}
+    except Exception as err:
+        return {"answer": None, "error": str(err), "ms": int((time.time() - t0) * 1000)}
 
 @app.get("/health")
 def health():
