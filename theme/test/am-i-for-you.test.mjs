@@ -142,3 +142,47 @@ test("extractReply finds the writes JSON escaped inside an SSE text block", asyn
   const sse = `event: response\ndata: ${JSON.stringify({ content: [{ type: "text", text: "```json\n" + JSON.stringify(reply) + "\n```" }] })}\n`;
   assert.deepEqual(extractReply(sse), reply);
 });
+
+test("toAgentEvent keeps ignoring fit_shown -- it's not a KG write", async () => {
+  const { toAgentEvent } = await import("../assets/am-i-for-you-cdp.js");
+  assert.equal(toAgentEvent({ type: "fit_shown", verdict: "caution" }, "PRD:store:glow-barrier-duo"), null);
+});
+
+test("renderFit: loading state", async () => {
+  const { renderFit } = await import("../assets/am-i-for-you-section-fit.js");
+  const html = renderFit("loading", null);
+  assert.match(html, /Is this right for you/);
+  assert.match(html, /aify-fit-shimmer/);
+});
+
+test("renderFit: error state", async () => {
+  const { renderFit } = await import("../assets/am-i-for-you-section-fit.js");
+  const html = renderFit("error", null);
+  assert.match(html, /couldn't check/);
+  assert.match(html, /aify-fit-retry/);
+});
+
+test("renderFit: ready state shows the verdict pill, reasons and sources", async () => {
+  const { renderFit } = await import("../assets/am-i-for-you-section-fit.js");
+  const answer = {
+    verdict: "caution",
+    headline: "Go slowly with this one.",
+    reasons: [{ text: "Your graph says sensitive skin.", basis: "profile", refs: ["SKT:sensitive"] }],
+    if_you_try: ["Patch test first."],
+    sources: ["your skin graph", "fda_aha"],
+  };
+  const html = renderFit("ready", answer);
+  assert.match(html, /Use with caution/);
+  assert.match(html, /Go slowly with this one\./);
+  assert.match(html, /Your graph says sensitive skin\./);
+  assert.match(html, /Patch test first\./);
+  assert.match(html, /your skin graph.*fda_aha/);
+});
+
+test("renderFit: ready state with no if_you_try and an unknown verdict doesn't throw", async () => {
+  const { renderFit } = await import("../assets/am-i-for-you-section-fit.js");
+  const answer = { verdict: "something_new", headline: "Unclear.", reasons: [], sources: [] };
+  const html = renderFit("ready", answer);
+  assert.match(html, /Need more info/); // falls back to the unknown-verdict label
+  assert.doesNotMatch(html, /aify-fit-try/);
+});
