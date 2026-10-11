@@ -28,11 +28,15 @@ async function init() {
   configure(CUSTOMER_ID, pageHandle);
   let panel = null;
 
-  // FIT_AGENT's "Is this right for you?" card. Starts at init, not on
-  // panel open, and never awaited -- the trigger button/panel are ready
-  // as soon as the profile loads, independent of how long this takes.
+  // FIT_AGENT's "Is this right for you?" card. Shopper-initiated: opens
+  // idle with a "Check" button (the call is slow and costs real Cortex
+  // usage, so it shouldn't fire on every page load) and only fetches once
+  // clicked. fitStarted tracks whether the shopper has asked yet, so a KG
+  // write doesn't silently kick off a check nobody requested.
+  let fitStarted = false;
   const runFit = async (vm) => {
     if (!panel || !pageHandle) return;
+    fitStarted = true;
     panel.fitEl.innerHTML = renderFit("loading", null);
     const answer = await fetchFit(proxyUrl, {
       shopper_id: `SHP:${CUSTOMER_ID}`,
@@ -46,15 +50,21 @@ async function init() {
       panel.fitEl.querySelector(".aify-fit-retry").onclick = () => runFit(vm);
     }
   };
+  const showFitIdle = (vm) => {
+    if (!panel) return;
+    panel.fitEl.innerHTML = renderFit("idle", null);
+    panel.fitEl.querySelector(".aify-fit-check").onclick = () => runFit(vm);
+  };
 
-  // After the agent writes to the KG, re-read /profile, redraw, and
+  // After the agent writes to the KG, re-read /profile, redraw, and --
+  // only if the shopper already asked for a fit check this visit --
   // re-check the fit answer against the shopper's updated graph.
   configureCdp(CUSTOMER_ID, pageHandle, proxyUrl, async () => {
     const next = await getLiveContext(CUSTOMER_ID, pageHandle, proxyUrl);
     const nextVm = buildViewModel(next.profile, next.ext, next.catalog, next.page);
     nextVm.source = next.source;
     panel?.update(nextVm);
-    runFit(nextVm);
+    if (fitStarted) runFit(nextVm);
   });
 
   // Skin & Routine read from the Snowflake KG; falls back to the seed.
@@ -62,7 +72,7 @@ async function init() {
   const vm = buildViewModel(ctx.profile, ctx.ext, ctx.catalog, ctx.page);
   vm.source = ctx.source;
   panel = createPanel({ sections: SECTIONS, vm });
-  runFit(vm);
+  showFitIdle(vm);
 
   const btn = document.createElement("button");
   btn.type = "button";

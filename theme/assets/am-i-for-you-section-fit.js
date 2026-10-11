@@ -4,12 +4,14 @@
  * Shows above the tabs (every tab, not a tab of its own) -- a verdict
  * from FIT_AGENT (docs/Snowflake_fit_agent.sql) grounded in the
  * product's ontology facts, sourced guidance, and the shopper's own
- * personal KG. Fetch starts at page init (am-i-for-you.js), not on
- * panel open, and never blocks the panel itself.
+ * personal KG. The agent call is slow (seconds, sometimes 20-30s per
+ * docs/progress.md) and costs real Cortex usage, so it's shopper-
+ * initiated: the card opens idle, with a button, and only fetches once
+ * that button is clicked (am-i-for-you.js wires the click and owns the
+ * actual <div data-cf-slot="fit"> element).
  *
  * renderFit() is PURE: (state, answer) -> HTML string. No DOM, no
- * fetch -- fetchFit() and the retry wiring live in am-i-for-you.js,
- * which owns the actual <div data-cf-slot="fit"> element.
+ * fetch -- fetchFit() and the check/retry wiring live in am-i-for-you.js.
  */
 
 import { t } from "./am-i-for-you-copy.js";
@@ -30,6 +32,11 @@ const VERDICT_CLASS = {
 };
 
 export function renderFit(state, answer) {
+  if (state === "idle") {
+    return `
+      <h3>${t("fit.title")}</h3>
+      <button type="button" class="aify-fit-check">${t("fit.check")}</button>`;
+  }
   if (state === "loading") {
     return `
       <h3>${t("fit.title")}</h3>

@@ -35,6 +35,7 @@ const COPY = {
   "rt.hint": "Tap a step for details.",
   "rt.ghost": "This product?",
   "fit.title": "Is this right for you?",
+  "fit.check": "Check",
   "fit.loading": "Checking this product against your skin graph…",
   "fit.error": "We couldn't check this right now.",
   "fit.retry": "Retry",
