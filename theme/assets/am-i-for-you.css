@@ -491,6 +491,7 @@
 /* "Is this right for you?" fit card -- above the tabs, shown on every tab. */
 .aify-fit {
   padding: 14px 20px;
+  margin-bottom: 8px;
   border-bottom: 1px solid var(--aify-line);
   background: var(--aify-surface);
 }
