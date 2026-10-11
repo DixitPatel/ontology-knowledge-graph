@@ -23,6 +23,11 @@ export const SkinSection = {
       <div class="aify-confirm" data-cf-slot="skin.confirm">${t("skin.confirm")}
         <button data-ans="yes">${t("skin.yes")}</button><button data-ans="changed">${t("skin.changed")}</button>
       </div>
+      <form class="aify-change" data-cf-slot="skin.change" hidden>
+        <input type="text" name="text" placeholder="${t("skin.change_placeholder")}" aria-label="${t("skin.change_placeholder")}" />
+        <button type="submit">${t("skin.save")}</button>
+        <div class="aify-change-status" aria-live="polite"></div>
+      </form>
     </div>
     <div class="aify-card" style="animation-delay:60ms" data-cf-slot="skin.concerns">
       <h3>${t("skin.concerns")}</h3>
@@ -52,7 +57,30 @@ export const SkinSection = {
       b.onclick = () => {
         el.querySelectorAll("[data-ans]").forEach((x) => x.classList.toggle("aify-on", x === b));
         emit("profile_confirmation", { field: "skin", answer: b.dataset.ans });
+        const form = el.querySelector(".aify-change");
+        form.hidden = b.dataset.ans !== "changed";
+        if (!form.hidden) form.querySelector("input").focus();
+        if (b.dataset.ans === "yes") el.querySelector(".aify-change-status").textContent = "";
       };
     });
+    const form = el.querySelector(".aify-change");
+    const status = form.querySelector(".aify-change-status");
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const text = form.text.value.trim();
+      if (!text) return;
+      status.textContent = t("skin.saving");
+      form.querySelector("button").disabled = true;
+      emit("profile_change_text", { text });
+    };
+    // Error/no-op reply: the panel is not redrawn, so say so here.
+    const onKg = (e) => {
+      if (!el.isConnected) return window.removeEventListener("aify:kg", onKg);
+      const { result, error } = e.detail;
+      if (error) status.textContent = t("skin.save_failed");
+      else if (result && !result.writes?.length) status.textContent = result.skipped?.[0] || t("skin.no_change");
+      form.querySelector("button").disabled = false;
+    };
+    window.addEventListener("aify:kg", onKg);
   },
 };

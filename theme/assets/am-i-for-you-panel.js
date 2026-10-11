@@ -110,5 +110,13 @@ export function createPanel({ sections, vm, initialTab = sections[0]?.id }) {
     if (e.key === "Escape" && document.body.classList.contains("aify-open")) close();
   });
 
-  return { open, close };
+  // Swap in a fresh view model (after a KG write) and redraw the open tab.
+  const update = (next) => {
+    vm = next;
+    rendered.clear();
+    const active = root.querySelector('.aify-tab[aria-selected="true"]')?.dataset.tab;
+    if (active && !bodyEl.hidden) select(active);
+  };
+
+  return { open, close, update };
 }

@@ -478,3 +478,11 @@
 .aify-cdp-debug--collapsed .aify-cdp-debug__body {
   display: none;
 }
+
+/* "Something changed" free-text -> KG write */
+.aify-change { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.aify-change[hidden] { display: none; }
+.aify-change input { flex: 1 1 220px; padding: 8px 12px; border: 1px solid var(--aify-line); border-radius: 999px; font: inherit; color: var(--aify-ink); background: var(--aify-surface); }
+.aify-change button { padding: 8px 16px; border: 1px solid var(--aify-brand); border-radius: 999px; background: var(--aify-brand); color: #fff; font: inherit; cursor: pointer; }
+.aify-change button:disabled { opacity: 0.5; cursor: progress; }
+.aify-change-status { flex-basis: 100%; font-size: 13px; color: var(--aify-muted); min-height: 1em; }

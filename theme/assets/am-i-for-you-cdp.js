@@ -1,16 +1,16 @@
-/* "Am I for you?" panel -- Snowflake CDP wiring (minimal).
+/* "Am I for you?" panel -- Snowflake CDP wiring.
  *
- * Forwards every aify:event (emitted by am-i-for-you-events.js) to the
- * local Cortex Agent proxy (docs/Snowflake_agent_proxy.py) as a CLICK
- * event, then renders the agent's verdict/reasons/next_question/conflicts
- * into a small debug panel.
+ * Turns panel events into KG writes via the Cortex Agent (CDP_AGENT v2,
+ * docs/Snowflake_agent_writer.sql) behind the local proxy
+ * (docs/Snowflake_agent_proxy.py). The agent only mutates the shopper's
+ * personal KG and replies {writes, skipped}. After a write, onWrite()
+ * lets the panel re-read /profile and redraw.
  *
- * Plumbing only -- does not touch the existing beauty_profile view model
- * or panel UI (see docs/Snowflake_HANDOFF.md Task 7). Shopper/product IDs
- * are best-effort (SHP:<customer_id>, PRD:<page_handle>); there is no real
- * mapping yet between this panel's catalog and the KG's PRD: node IDs, so
- * rank_products/next_question will usually come back empty/neutral for
- * products the KG doesn't know about. That's expected for this pass.
+ * Panel event            -> agent event
+ *   profile_confirmation yes -> CONFIRM
+ *   profile_change_text      -> FREE_TEXT {text}
+ *   routine_node_selected (candidate) -> INTEREST {target: this product}
+ * Everything else (open/close/tab views) is not sent.
  */
 
 const DEFAULT_PROXY_URL = "http://127.0.0.1:8788";
@@ -18,6 +18,7 @@ const DEFAULT_PROXY_URL = "http://127.0.0.1:8788";
 let shopperId = null;
 let productId = null;
 let proxyUrl = DEFAULT_PROXY_URL;
+let onWrite = () => {};
 let debugEl = null;
 
 function ensureDebugPanel() {
@@ -25,36 +26,30 @@ function ensureDebugPanel() {
   debugEl = document.createElement("div");
   debugEl.className = "aify-cdp-debug";
   debugEl.setAttribute("aria-live", "polite");
-  debugEl.innerHTML = `<div class="aify-cdp-debug__head">CDP (debug)</div><div class="aify-cdp-debug__body">waiting for events&hellip;</div>`;
+  debugEl.innerHTML = `<div class="aify-cdp-debug__head">KG writes (debug)</div><div class="aify-cdp-debug__body">waiting for events&hellip;</div>`;
   debugEl.querySelector(".aify-cdp-debug__head").onclick = () => debugEl.classList.toggle("aify-cdp-debug--collapsed");
   document.body.appendChild(debugEl);
   return debugEl;
 }
 
-function renderDebug(result) {
+function renderDebug(type, result, ms) {
   const el = ensureDebugPanel().querySelector(".aify-cdp-debug__body");
   if (!result) {
-    el.textContent = "no response";
+    el.textContent = `${type}: no parsable reply (${ms}ms)`;
     return;
   }
-  const { verdict, reasons = [], next_question, conflicts = [] } = result;
+  const { writes = [], skipped = [] } = result;
   el.innerHTML = `
-    <div><strong>verdict:</strong> ${verdict ?? "—"}</div>
-    ${reasons.length ? `<ul>${reasons.map((r) => `<li>${r}</li>`).join("")}</ul>` : ""}
-    ${next_question ? `<div><strong>next question:</strong> ${next_question.text}</div>` : ""}
-    ${conflicts.length ? `<div><strong>conflicts:</strong> ${conflicts.length}</div>` : ""}
-  `;
+    <div><strong>${type}</strong> · ${ms}ms</div>
+    ${writes.length ? `<ul>${writes.map((w) => `<li>${w.op} ${w.edge ?? ""} ${w.target ?? ""}</li>`).join("")}</ul>` : "<div>no writes</div>"}
+    ${skipped.length ? `<div><strong>skipped:</strong> ${skipped.join("; ")}</div>` : ""}`;
 }
 
-// The agent's :run endpoint streams SSE "data: {...}" lines. The final
-// verdict JSON is embedded as a string inside one of those events' content
-// (a {type:"text", text:"...{\"verdict\":...}"} block), escaped by that
-// event's own JSON encoding -- so it must be JSON.parsed once to unescape
-// before the verdict JSON inside it can be parsed. Walk every data line's
-// parsed object looking for a string value that itself parses as a
-// {verdict: ...} object; the last one found wins (the agent may mention
-// "verdict" earlier while narrating its plan).
-function extractVerdict(sseText) {
+// The agent's :run endpoint streams SSE "data: {...}" lines. The reply
+// JSON sits as an escaped string inside one event's text block, so each
+// data line is JSON.parsed first, then every string value is tried as
+// JSON containing `key`. The last match wins.
+export function extractReply(sseText, key = "writes") {
   let found = null;
   for (const line of sseText.split("\n")) {
     if (!line.startsWith("data: ")) continue;
@@ -68,13 +63,13 @@ function extractVerdict(sseText) {
     while (stack.length) {
       const cur = stack.pop();
       if (typeof cur === "string") {
-        const trimmed = cur.trim();
-        if (trimmed.startsWith("{") && trimmed.includes('"verdict"')) {
+        const s = cur.trim().replace(/^```(?:json)?\s*|\s*```$/g, "");
+        if (s.startsWith("{") && s.includes(`"${key}"`)) {
           try {
-            const parsed = JSON.parse(trimmed);
-            if (parsed && parsed.verdict) found = parsed;
+            const parsed = JSON.parse(s);
+            if (parsed && key in parsed) found = parsed;
           } catch {
-            // not the JSON we're looking for
+            // not the reply
           }
         }
       } else if (Array.isArray(cur)) {
@@ -87,31 +82,44 @@ function extractVerdict(sseText) {
   return found;
 }
 
-async function sendEvent(type, payload) {
-  if (!shopperId) return;
+async function send(eventType, payload) {
+  if (!shopperId) return null;
+  const t0 = performance.now();
   try {
     const res = await fetch(`${proxyUrl}/event`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        shopper_id: shopperId,
-        product_id: productId,
-        event_type: "CLICK",
-        payload: { aify_event: type, ...payload },
-      }),
+      body: JSON.stringify({ shopper_id: shopperId, product_id: productId, event_type: eventType, payload }),
     });
-    const text = await res.text();
-    const result = extractVerdict(text);
-    console.log("[aify:cdp]", type, result);
-    renderDebug(result);
+    const result = extractReply(await res.text());
+    const ms = Math.round(performance.now() - t0);
+    console.log("[aify:kg]", eventType, result, `${ms}ms`);
+    renderDebug(eventType, result, ms);
+    window.dispatchEvent(new CustomEvent("aify:kg", { detail: { eventType, result } }));
+    if (result?.writes?.length) await onWrite(result);
+    return result;
   } catch (err) {
-    console.warn("[aify:cdp] proxy unreachable", err);
+    console.warn("[aify:kg] proxy unreachable", err);
+    window.dispatchEvent(new CustomEvent("aify:kg", { detail: { eventType, result: null, error: true } }));
+    return null;
   }
 }
 
-export function configureCdp(customerId, pageHandle, url = DEFAULT_PROXY_URL) {
+// PURE: panel event -> [agent event_type, payload] or null (not sent).
+export function toAgentEvent(detail, product) {
+  if (detail.type === "profile_confirmation" && detail.answer === "yes") return ["CONFIRM", {}];
+  if (detail.type === "profile_change_text" && detail.text?.trim()) return ["FREE_TEXT", { text: detail.text.trim() }];
+  if (detail.type === "routine_node_selected" && detail.node === "candidate" && product) return ["INTEREST", { target: product }];
+  return null;
+}
+
+export function configureCdp(customerId, pageHandle, url = DEFAULT_PROXY_URL, writeHandler) {
   shopperId = customerId ? `SHP:${customerId}` : null;
-  productId = pageHandle ? `PRD:${pageHandle}` : null;
-  proxyUrl = url;
-  window.addEventListener("aify:event", (e) => sendEvent(e.detail.type, e.detail));
+  productId = pageHandle ? `PRD:store:${pageHandle}` : null;
+  proxyUrl = url || DEFAULT_PROXY_URL;
+  if (writeHandler) onWrite = writeHandler;
+  window.addEventListener("aify:event", (e) => {
+    const ev = toAgentEvent(e.detail, productId);
+    if (ev) send(...ev);
+  });
 }

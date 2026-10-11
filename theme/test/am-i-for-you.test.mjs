@@ -124,3 +124,21 @@ test("profileFromKg: KG rows mirroring the seed give the same view model", async
   assert.deepEqual(vmKg.skin, vmSeed.skin);
   assert.deepEqual(vmKg.routine, vmSeed.routine);
 });
+
+test("toAgentEvent sends only events that change the KG", async () => {
+  const { toAgentEvent } = await import("../assets/am-i-for-you-cdp.js");
+  const prd = "PRD:store:glow-barrier-duo";
+  assert.deepEqual(toAgentEvent({ type: "profile_confirmation", answer: "yes" }, prd), ["CONFIRM", {}]);
+  assert.equal(toAgentEvent({ type: "profile_confirmation", answer: "changed" }, prd), null);
+  assert.deepEqual(toAgentEvent({ type: "profile_change_text", text: " my skin is oily now " }, prd), ["FREE_TEXT", { text: "my skin is oily now" }]);
+  assert.deepEqual(toAgentEvent({ type: "routine_node_selected", node: "candidate" }, prd), ["INTEREST", { target: prd }]);
+  assert.equal(toAgentEvent({ type: "routine_node_selected", node: "SK-CLN-201" }, prd), null);
+  assert.equal(toAgentEvent({ type: "panel_opened" }, prd), null);
+});
+
+test("extractReply finds the writes JSON escaped inside an SSE text block", async () => {
+  const { extractReply } = await import("../assets/am-i-for-you-cdp.js");
+  const reply = { writes: [{ op: "upsert", edge: "HAS", target: "SKT:oily" }], skipped: [] };
+  const sse = `event: response\ndata: ${JSON.stringify({ content: [{ type: "text", text: "```json\n" + JSON.stringify(reply) + "\n```" }] })}\n`;
+  assert.deepEqual(extractReply(sse), reply);
+});

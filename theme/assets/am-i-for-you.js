@@ -24,13 +24,20 @@ async function init() {
 
   const pageHandle = window.ONESELF_PRODUCT_HANDLE;
   configure(CUSTOMER_ID, pageHandle);
-  configureCdp(CUSTOMER_ID, pageHandle, window.ONESELF_CDP_PROXY_URL);
+  let panel = null;
+  // After the agent writes to the KG, re-read /profile and redraw.
+  configureCdp(CUSTOMER_ID, pageHandle, window.ONESELF_CDP_PROXY_URL, async () => {
+    const next = await getLiveContext(CUSTOMER_ID, pageHandle, window.ONESELF_CDP_PROXY_URL);
+    const nextVm = buildViewModel(next.profile, next.ext, next.catalog, next.page);
+    nextVm.source = next.source;
+    panel?.update(nextVm);
+  });
 
   // Skin & Routine read from the Snowflake KG; falls back to the seed.
   const ctx = await getLiveContext(CUSTOMER_ID, pageHandle, window.ONESELF_CDP_PROXY_URL);
   const vm = buildViewModel(ctx.profile, ctx.ext, ctx.catalog, ctx.page);
   vm.source = ctx.source;
-  const panel = createPanel({ sections: SECTIONS, vm });
+  panel = createPanel({ sections: SECTIONS, vm });
 
   const btn = document.createElement("button");
   btn.type = "button";

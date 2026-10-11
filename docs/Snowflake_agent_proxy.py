@@ -42,11 +42,54 @@ async def event(req: Request):
     body = {"messages": [{"role": "user",
                           "content": [{"type": "text", "text": json.dumps(ev)}]}]}
     async def stream():
+        buf = bytearray()
+        t0 = time.time()
+        print(f"[event] {ev.get('event_type')} {json.dumps(ev.get('payload'))}", flush=True)
         async with httpx.AsyncClient(timeout=60) as c:
             async with c.stream("POST", AGENT_URL, headers=headers(), json=body) as r:
                 async for chunk in r.aiter_bytes():
+                    buf.extend(chunk)
                     yield chunk
+        log_agent_trace(buf.decode("utf-8", "replace"), time.time() - t0)
     return StreamingResponse(stream(), media_type="text/event-stream")
+
+
+def _find(obj, key):
+    """First dict (depth-first) that has `key`."""
+    stack = [obj]
+    while stack:
+        cur = stack.pop()
+        if isinstance(cur, dict):
+            if key in cur:
+                return cur
+            stack.extend(cur.values())
+        elif isinstance(cur, list):
+            stack.extend(cur)
+    return None
+
+
+def log_agent_trace(sse: str, secs: float):
+    """Print tool calls, tool results and the final reply to the uvicorn console."""
+    name = None
+    for line in sse.splitlines():
+        if line.startswith("event: "):
+            name = line[7:].strip()
+            continue
+        if not line.startswith("data: ") or name not in ("response.tool_use", "response.tool_result", "response.text"):
+            continue
+        try:
+            d = json.loads(line[6:])
+        except ValueError:
+            continue
+        if name == "response.tool_use":
+            u = _find(d, "input") or {}
+            print(f"  -> {u.get('name')} {json.dumps(u.get('input'))[:200]}", flush=True)
+        elif name == "response.tool_result":
+            res = (_find(d.get("content"), "result") or {}).get("result", d.get("content"))
+            print(f"  <- {d.get('name', '')} [{d.get('status', '')}] {json.dumps(res)[:200]}", flush=True)
+        else:
+            print(f"  reply {d.get('text', '')[:300]}", flush=True)
+    print(f"  done in {secs:.1f}s", flush=True)
 
 @app.post("/answer")
 async def answer(req: Request):

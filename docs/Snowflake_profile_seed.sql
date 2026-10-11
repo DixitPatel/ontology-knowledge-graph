@@ -23,7 +23,10 @@ USING (SELECT column1 id, column2 typ, column3 name, PARSE_JSON(column4) props F
   ('PRD:ext:SK-CLN-201','PRODUCT','Daily Kit Gel Cleanser','{"price":14,"sku":"SK-CLN-201"}'),
   ('PRD:ext:SK-AZA-010','PRODUCT','Quiet Tone Azelaic 10%','{"price":32,"sku":"SK-AZA-010"}'),
   ('PRD:ext:SK-SPF-330','PRODUCT','Shoreline Mineral SPF 30','{"price":28,"sku":"SK-SPF-330"}'),
-  ('PRD:ext:SK-MST-045','PRODUCT','Still Water Barrier Cream','{"price":34,"sku":"SK-MST-045"}')
+  ('PRD:ext:SK-MST-045','PRODUCT','Still Water Barrier Cream','{"price":34,"sku":"SK-MST-045"}'),
+  ('PRD:store:glow-barrier-duo','PRODUCT','Glow Barrier Duo','{"price":45}'),
+  ('PRD:store:cloud-whip-moisturiser','PRODUCT','Cloud Whip Barrier Restore Moisturiser','{"price":28}'),
+  ('PRD:store:smooth-operator-aha-serum','PRODUCT','Smooth Operator AHA Serum','{"price":24}')
 ) s ON t.NODE_ID = s.id
 WHEN MATCHED THEN UPDATE SET NAME = s.name, PROPS = s.props
 WHEN NOT MATCHED THEN INSERT (NODE_ID, NODE_TYPE, NAME, PROPS, SOURCE)
