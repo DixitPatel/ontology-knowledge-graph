@@ -8,3 +8,4 @@ theme/.shopify/
 .idea/
 __pycache__/
 .venv-sf/
+docs/
