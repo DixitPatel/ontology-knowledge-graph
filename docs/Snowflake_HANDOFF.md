@@ -1,6 +1,5 @@
 # Handoff: Skincare KG + Cortex Agent CDP (Coframe hackathon MVP)
 
-Date: 2026-10-10. Owner: Dixit. Deadline: demo today.
 
 ## Goal
 A shopper-led product page has an "Am I for you?" tab. The tab sends events to a
@@ -40,12 +39,6 @@ Edges:
 - SHOPPER -HAS | USES | INTERESTED_IN-> node (this is the CDP profile)
 
 ## Snowflake account
-- Account RS56916, locator BJ02107, Enterprise, AWS US East (Ohio) = us-east-2.
-- Probably a trial (created ~2026-09-28). Cortex needs a credit card on file.
-- us-east-2 is not a native Cortex Analyst region. Cross-region inference is required.
-- Role KG_DEV, warehouse KG_WH (XS, auto-suspend 60 s).
-- Auth: key pair, `~/.snowflake/keys/rsa_key.p8` (no passphrase), connection `kg`
-  in `~/.snowflake/connections.toml`.
 
 ## Current state (updated 2026-10-10, see docs/progress.md for full evidence)
 - [x] SQL scripts written
@@ -59,12 +52,7 @@ Edges:
 
 ## Tasks (do in order; stop and report on first failure)
 1. **Account setup** (ACCOUNTADMIN, Snowsight):
-   ```sql
-   ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION='AWS_US';
-   -- create KG_WH, KG_DEV, grants, CORTEX_USER, user defaults (see chat step 1)
-   SELECT AI_COMPLETE('claude-4-sonnet','ping');
-   ```
-   Pass: AI_COMPLETE returns text. If not: tell Dixit to add a card (Admin > Billing).
+
 2. **Local CLI:** `snow connection test -c kg`. Pass: success.
 3. **Load KG:** `snow sql -c kg -f skincare_kg.sql`.
    Pass: the smoke test shows Bright Spot Serum on top and Night Renew Serum BLOCKED
@@ -103,9 +91,6 @@ Edges:
 - The private key has no passphrase. Rotate it after the event.
 - Seed data is demo data. Do not present ingredient facts as medical claims.
 
-## Out of scope today
-Jev confidence gate, external access integrations (trial blocks egress), cancer KG,
-real product catalog load.
 
 ## Demo script
 1. New shopper opens the tab. Show the next question from NEXT_QUESTION.
