@@ -18,11 +18,6 @@ Hackathon build. Speed matters. Follow PLAN.md.
 - Work only inside this folder.
 
 ## Environment
-- STORE=oneself-kczbrdsl.myshopify.com
-- Theme: Dawn in /theme. Preview: `cd theme && shopify theme dev --store $STORE` → http://127.0.0.1:9292
-  Run it in the background; do not block on it.
-- Backend: Node 20, Express, SQLite, port 8787.
-- Playwright for smoke/e2e (`npx playwright` with installed Chromium).
 
 ## Status
 - T1–T17 done. All 6 phase gates pass (see `docs/progress.md` for evidence per ticket).
